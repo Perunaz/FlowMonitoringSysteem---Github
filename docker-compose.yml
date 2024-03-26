@@ -2,7 +2,7 @@ version: '3.4'
 services:
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
-    container_name: rabbitmq
+    container_name: rabbitMQ
     volumes:
       - rabbitmqdata:/var/lib/rabbitmq
       - "./rabbitmq:/etc/FlowMonitoringSysteem/"
@@ -14,7 +14,7 @@ services:
 
   influxdb:
     image: influxdb:latest
-    container_name: influxdb
+    container_name: influxDB
     ports:
       - "8086:8086"
     volumes:
@@ -26,11 +26,23 @@ services:
       - INFLUXDB_USER=${INFLUXDB_USER}
       - INFLUXDB_USER_PASSWORD=${INFLUXDB_USER_PASSWORD}
 
+  notficationservice:
+    build:
+      context: ./NotificationService
+      dockerfile: Dockerfile
+    container_name: notificationService
+    depends_on:
+      - rabbitmq
+    ports:
+      - "3100:3100"
+    environment:
+      - NODE_ENV=production
+
   backendinfrastructure:
     build:
       context: ./MonitoringBackEnd
       dockerfile: Dockerfile
-    container_name: backendinfrastructure
+    container_name: backendInfrastructure
     depends_on:
       - rabbitmq
       - influxdb
