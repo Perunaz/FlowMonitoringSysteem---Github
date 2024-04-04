@@ -8,29 +8,39 @@
         "name": "Teams App, Inc.",
         "websiteUrl": "https://www.example.com",
         "privacyUrl": "https://www.example.com/privacy",
-        "termsOfUseUrl": "https://www.example.com/termsofuse"
+        "termsOfUseUrl": "https://www.example.com/termofuse"
     },
     "icons": {
         "color": "color.png",
         "outline": "outline.png"
     },
     "name": {
-        "short": "TeamsApp${{APP_NAME_SUFFIX}}",
-        "full": "Full name for TeamsApp"
+        "short": "team-central-dashboard${{APP_NAME_SUFFIX}}",
+        "full": "Full name for team-central-dashboard"
     },
     "description": {
-        "short": "Short description of TeamsApp",
-        "full": "Full description of TeamsApp"
+        "short": "Short description of team-central-dashboard",
+        "full": "Full description of team-central-dashboard"
     },
     "accentColor": "#FFFFFF",
     "bots": [],
     "composeExtensions": [],
+    "configurableTabs": [
+        {
+            "configurationUrl": "${{TAB_ENDPOINT}}/index.html#/config",
+            "canUpdateConfiguration": true,
+            "scopes": [
+                "team",
+                "groupchat"
+            ]
+        }
+    ],
     "staticTabs": [
         {
             "entityId": "index0",
-            "name": "Personal Tab",
-            "contentUrl": "${{TAB_ENDPOINT}}/tab",
-            "websiteUrl": "${{TAB_ENDPOINT}}/tab",
+            "name": "Dashboard",
+            "contentUrl": "${{TAB_ENDPOINT}}/index.html#/tab",
+            "websiteUrl": "${{TAB_ENDPOINT}}/index.html#/tab",
             "scopes": [
                 "personal"
             ]
@@ -42,5 +52,19 @@
     ],
     "validDomains": [
         "${{TAB_DOMAIN}}"
-    ]
+    ],
+    "webApplicationInfo": {
+        "id": "${{AAD_APP_CLIENT_ID}}",
+        "resource": "api://${{TAB_DOMAIN}}/${{AAD_APP_CLIENT_ID}}"
+    },
+    "activities": {
+        "activityTypes": [
+            {
+                "type": "taskCreated",
+                "description": "Task Created",
+                "templateText": "{actor} created task"
+            }
+        ]
+    },
+    "showLoadingIndicator": false
 }
