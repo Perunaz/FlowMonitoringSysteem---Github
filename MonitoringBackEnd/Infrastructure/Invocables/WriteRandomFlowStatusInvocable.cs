@@ -1,36 +1,27 @@
-﻿using System;
-using System.Threading.Tasks;
-using Infrastructure.Services;
-using Coravel.Invocable;
-using InfluxDB.Client.Api.Domain;
-using InfluxDB.Client.Writes;
+﻿using Coravel.Invocable;
+using DomainServices.IRepositories;
+using Core.Domain;
 
 namespace Infrastructure.Invocables
 {
-    public class WriteRandomFlowStatusInvocable : IInvocable
-    {
-        private readonly InfluxDBService _influxDBService;
-        private static readonly Random _random = new Random();
+	public class WriteRandomFlowStatusInvocable : IInvocable
+	{
+		private readonly IFlowStatusRepository _flowStatusWriter;
 
-        public WriteRandomFlowStatusInvocable(InfluxDBService influxDBService)
-        {
-            _influxDBService = influxDBService;
-        }
+		public WriteRandomFlowStatusInvocable(IFlowStatusRepository flowStatusWriter)
+		{
+			_flowStatusWriter = flowStatusWriter;
+		}
 
-        public Task Invoke()
-        {
-            _influxDBService.Write(write =>
-            {
-                var point = PointData.Measurement("flowStatus")
-                    .Tag("flow", "test-flow")
-                    .Field("value", _random.Next(0, 5))
-                    .Timestamp(DateTime.UtcNow, WritePrecision.Ns);
+		public Task Invoke()
+		{
+			int randomValue = new Random().Next(0, 5);
 
-                write.WritePoint(point, "poc-bucket", "fourtop-ict");
-            });
+			FlowStatus flowStatus = new FlowStatus("1", 5, "test-flow", randomValue);
 
-            Console.WriteLine(Task.CompletedTask);
-            return Task.CompletedTask;
-        }
-    }
+			_flowStatusWriter.WriteFlowStatus(flowStatus);
+
+			return Task.CompletedTask;
+		}
+	}
 }

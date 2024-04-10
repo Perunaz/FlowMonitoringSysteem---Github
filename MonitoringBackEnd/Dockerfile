@@ -1,5 +1,5 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
-WORKDIR /Infrastructure
+WORKDIR /EventBusAPI
 
 # Copy everything
 COPY . ./
@@ -12,6 +12,6 @@ EXPOSE 7212
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
-WORKDIR /Infrastructure
-COPY --from=build-env /Infrastructure/out .
-ENTRYPOINT ["dotnet", "Infrastructure.dll"]
+WORKDIR /EventBusAPI
+COPY --from=build-env /EventBusAPI/out .
+ENTRYPOINT ["dotnet", "EventBusAPI.dll"]

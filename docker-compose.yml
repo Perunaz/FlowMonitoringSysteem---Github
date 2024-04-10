@@ -2,7 +2,7 @@ version: '3.4'
 services:
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
-    container_name: rabbitMQ
+    container_name: rabbitmq
     volumes:
       - rabbitmqdata:/var/lib/rabbitmq
       - "./rabbitmq:/etc/FlowMonitoringSysteem/"
@@ -14,7 +14,7 @@ services:
 
   influxdb:
     image: influxdb:latest
-    container_name: influxDB
+    container_name: influxdb
     ports:
       - "8086:8086"
     volumes:
@@ -25,32 +25,38 @@ services:
       - INFLUXDB_ADMIN_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
       - INFLUXDB_USER=${INFLUXDB_USER}
       - INFLUXDB_USER_PASSWORD=${INFLUXDB_USER_PASSWORD}
+      - INFLUXDB_LOGGING_LEVEL=debug
 
   notficationservice:
     build:
       context: ./NotificationService
       dockerfile: Dockerfile
-    container_name: notificationService
+    container_name: notificationservice
     depends_on:
       - rabbitmq
     ports:
-      - "3100:3100"
+      - "3200:3200"
     environment:
       - NODE_ENV=production
 
-  backendinfrastructure:
+  backend:
     build:
       context: ./MonitoringBackEnd
       dockerfile: Dockerfile
-    container_name: backendInfrastructure
+    container_name: backend
     depends_on:
       - rabbitmq
       - influxdb
     ports:
-      - "3000:3000"
+      - 5262
+      - 7212
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:3000
+      - ASPNETCORE_URLS=https://+:7212;http://+:5262
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=${CERTIFICATE_PASSWORD}
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+    volumes:
+      - ~/.aspnet/https:/https:ro
 
 volumes:
   rabbitmqdata:
