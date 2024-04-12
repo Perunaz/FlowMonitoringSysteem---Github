@@ -6,11 +6,11 @@ namespace Infrastructure.Invocables
 {
 	public class WriteRandomFlowStatusInvocable : IInvocable
 	{
-		private readonly IFlowStatusRepository _flowStatusWriter;
+		private readonly IFlowStatusRepository _flowStatusRepository;
 
-		public WriteRandomFlowStatusInvocable(IFlowStatusRepository flowStatusWriter)
+		public WriteRandomFlowStatusInvocable(IFlowStatusRepository flowStatusRepository)
 		{
-			_flowStatusWriter = flowStatusWriter;
+            _flowStatusRepository = flowStatusRepository;
 		}
 
 		public Task Invoke()
@@ -19,9 +19,7 @@ namespace Infrastructure.Invocables
 
 			FlowStatus flowStatus = new FlowStatus("1", 5, "test-flow", randomValue);
 
-			_flowStatusWriter.WriteFlowStatus(flowStatus);
-
-			return Task.CompletedTask;
+            return _flowStatusRepository.WriteFlowStatus(flowStatus);
 		}
 	}
 }

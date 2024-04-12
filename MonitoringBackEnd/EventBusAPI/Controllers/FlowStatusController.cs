@@ -21,12 +21,12 @@ namespace EventBusAPI.Controllers
 		}
 
 		[HttpPost("addFlowStatus")]
-		public Task<FlowStatus> AddFlowStatus(FlowStatus flowStatus)
+		public FlowStatus AddFlowStatus(FlowStatus flowStatus)
 		{
-			var flowStatusData = _flowStatusService.CreateFlowStatus(flowStatus);
+			_flowStatusService.CreateFlowStatus(flowStatus);
 			//send the inserted product data to the queue and consumer will listening this data from queue
-			_rabbitMQProducer.PublishEvent(flowStatusData, "flowstatus", "flowstatus_created", "");
-			return flowStatusData;
+			_rabbitMQProducer.PublishEvent(flowStatus, "flowstatus", "flowstatus_created", "");
+			return flowStatus;
 		}
 	}
 }

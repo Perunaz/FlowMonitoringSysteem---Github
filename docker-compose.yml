@@ -35,7 +35,19 @@ services:
     depends_on:
       - rabbitmq
     ports:
-      - "3200:3200"
+      - "3100:3100"
+    environment:
+      - NODE_ENV=production
+    
+  teamsapp:
+    build:
+      context: ./TeamsApp
+      dockerfile: Dockerfile
+    container_name: teamsapp
+    depends_on:
+      - rabbitmq
+    ports:
+      - "9000:9000"
     environment:
       - NODE_ENV=production
 
@@ -48,8 +60,8 @@ services:
       - rabbitmq
       - influxdb
     ports:
-      - 5262
-      - 7212
+      - "5262:5262"
+      - "7212:7212"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=https://+:7212;http://+:5262

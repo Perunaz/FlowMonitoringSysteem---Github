@@ -18,7 +18,7 @@ namespace DomainServices.Services.Implementation
 			_flowStatusRepository = flowStatusRepository;
 		}
 
-		public Task<FlowStatus> CreateFlowStatus(FlowStatus flowStatus)
+		public Task CreateFlowStatus(FlowStatus flowStatus)
 		{
 			return _flowStatusRepository.WriteFlowStatus(flowStatus);
 		}
@@ -33,5 +33,5 @@ namespace DomainServices.Services.Implementation
 			throw new NotImplementedException();
 
 		}
-	}
+    }
 }
