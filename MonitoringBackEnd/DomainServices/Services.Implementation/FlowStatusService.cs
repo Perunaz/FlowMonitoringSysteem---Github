@@ -1,15 +1,15 @@
-﻿using Core.Domain;
-using DomainServices.Services.Interface;
+﻿using DomainServices.Services.Interface;
 using DomainServices.IRepositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Core.Domain.Flow;
 
 namespace DomainServices.Services.Implementation
 {
-	public class FlowStatusService : IFlowStatusService
+    public class FlowStatusService : IFlowStatusService
 	{
 		private readonly IFlowStatusRepository _flowStatusRepository;
 
@@ -23,7 +23,7 @@ namespace DomainServices.Services.Implementation
 			return _flowStatusRepository.WriteFlowStatus(flowStatus);
 		}
 
-		public Task<IEnumerable<(FlowStatus, string)>> GetAll()
+		public Task<IEnumerable<FlowStatusModel>> GetAll()
 		{
 			return _flowStatusRepository.GetAll();
 		}

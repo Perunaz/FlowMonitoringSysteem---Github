@@ -2,55 +2,62 @@
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using System.Text;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using System.Threading.Channels;
 
 namespace EventBusAPI.RabbitMQ.Producers
 {
 	public class RabbitMQProducer : IRabbitMQProducer
 	{
-		private readonly string _hostName;
-		private readonly int _port;
-        private readonly string _userName;
-        private readonly string _password;
-        private readonly ConnectionFactory _factory;
-        private IConnection _connection;
+		private string _hostName;
+		private int _port;
+        private string _userName;
+        private string _password;
+        private IConnection connection;
+        private IModel channel;
 
         public RabbitMQProducer(IConfiguration configuration)
 		{
-            _hostName = configuration.GetValue<string>("RabbitMQ:HostName");
+			_hostName = configuration.GetValue<string>("RabbitMQ:HostName");
 			_port = configuration.GetValue<int>("RabbitMQ:Port");
-            _userName = configuration.GetValue<string>("RabbitMQ:UserName");
-            _password = configuration.GetValue<string>("RabbitMQ:Password");
+			_userName = configuration.GetValue<string>("RabbitMQ:UserName");
+			_password = configuration.GetValue<string>("RabbitMQ:Password");
+		}
 
-            _factory = new ConnectionFactory
-            {
+        public void Connect(string queueName)
+		{
+			ConnectionFactory factory = new ConnectionFactory
+			{
                 HostName = _hostName,
                 Port = _port,
                 UserName = _userName,
-                Password = _password,
+				Password = _password,
             };
-        }
 
-        public void PublishEvent<T>(T message, string queueName, string routingKey, string exchange)
+			connection = factory.CreateConnection();
+			channel = connection.CreateModel();
+
+			channel.QueueDeclare(queueName, false, false, false, null);
+		}
+
+		public void Disconnect()
 		{
-            // Check if connection is null or closed, then create a new one
-            if (_connection == null || !_connection.IsOpen)
-            {
-                _connection = _factory.CreateConnection();
-            }
+			channel = null;
 
-            // Create the RabbitMQ channel using the existing connection
-            using (var channel = _connection.CreateModel())
-            {
-                // Declare the queue
-                channel.QueueDeclare(queueName, exclusive: false);
+			if (connection.IsOpen)
+			{
+				connection.Close();
+			}
 
-                // Serialize the message
-                var json = JsonConvert.SerializeObject(message);
-                var body = Encoding.UTF8.GetBytes(json);
+			connection.Dispose();
+			connection = null;
+		}
 
-                // Publish the message
-                channel.BasicPublish(exchange: exchange, routingKey: routingKey, body: body);
-            }
-        }
+		public void SendMessage<T>(T message, string queueName)
+		{
+            var json = JsonConvert.SerializeObject(message);
+			byte[] messageBody = Encoding.UTF8.GetBytes(json);
+			channel.BasicPublish(string.Empty, queueName, null, messageBody);
+		}
 	}
 }

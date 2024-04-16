@@ -1,4 +1,4 @@
-﻿using Core.Domain;
+﻿using Core.Domain.Flow;
 using DomainServices.IRepositories;
 using InfluxDB.Client.Api.Domain;
 using InfluxDB.Client.Writes;
@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Infrastructure.Repositories
 {
-	public class FlowStatusRepository : IFlowStatusRepository
+    public class FlowStatusRepository : IFlowStatusRepository
 	{
 		private readonly InfluxDBService _influxDBService;
 
@@ -16,7 +16,7 @@ namespace Infrastructure.Repositories
 			_influxDBService = influxDBService;
 		}
 
-        public async Task<IEnumerable<(FlowStatus, string)>> GetAll()
+        public async Task<IEnumerable<FlowStatusModel>> GetAll()
         {
             var results = await _influxDBService.QueryAsync(async query =>
             {
@@ -25,19 +25,17 @@ namespace Infrastructure.Repositories
                 return tables.SelectMany(table =>
                 table.Records.Select(record =>
                     {
-                        var flowStatus = new FlowStatus(
-                            Guid.NewGuid(),
-                            record.GetValueByKey("name").ToString(),
-                            int.Parse(record.GetValueByKey("category").ToString()),
-                            int.Parse(record.GetValue().ToString())
-                        );
+                        var flowStatus = new FlowStatusModel(
+                            record.GetValueByKey("flow").ToString(),
+							int.Parse(record.GetValue().ToString()), 
+							record.GetTime().ToString()
+						);
 
-                        return (FlowStatus: flowStatus, Time: record.GetTime().ToString());
+                        return flowStatus;
                     })
                 );
             });
-
-            Console.WriteLine(results.ToArray()[0]);
+            
             return results;
         }
 
@@ -49,8 +47,6 @@ namespace Infrastructure.Repositories
 				{
 					var point = PointData.Measurement("flowStatus")
 						.Tag("flow", flowStatus.FlowId.ToString())
-						.Field("name", flowStatus.FlowName)
-						.Field("category", flowStatus.FlowCategory)
 						.Field("value", flowStatus.StateCode)
                         .Timestamp(DateTime.UtcNow, WritePrecision.Ns);
 

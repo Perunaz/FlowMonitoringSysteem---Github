@@ -16,4 +16,4 @@ RUN npm run build
 EXPOSE 53000
 
 # defined in package.json
-CMD [ "npm", "run", "dev:teamsfx" ]
+CMD [ "npm", "run", "start" ] 

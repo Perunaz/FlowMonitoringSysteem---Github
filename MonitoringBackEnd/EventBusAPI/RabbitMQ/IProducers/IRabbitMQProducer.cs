@@ -2,6 +2,9 @@
 {
 	public interface IRabbitMQProducer
 	{
-		public void PublishEvent<T>(T message, string queueName, string routingKey, string exchange);
+		public void Connect(string queueName);
+		public void Disconnect();
+		public void SendMessage<T>(T message, string queueName);
+
 	}
 }
