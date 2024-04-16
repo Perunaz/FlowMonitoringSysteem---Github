@@ -10,5 +10,6 @@ namespace DomainServices.IRepositories
 	public interface IFlowStatusRepository
 	{
 		Task<FlowStatus> WriteFlowStatus(FlowStatus flowStatus);
-	}
+        Task<IEnumerable<(FlowStatus, string)>> GetAll();
+    }
 }

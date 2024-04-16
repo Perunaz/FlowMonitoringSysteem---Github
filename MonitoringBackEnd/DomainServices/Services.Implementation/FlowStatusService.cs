@@ -23,9 +23,9 @@ namespace DomainServices.Services.Implementation
 			return _flowStatusRepository.WriteFlowStatus(flowStatus);
 		}
 
-		public IEnumerable<FlowStatus> GetAll()
+		public Task<IEnumerable<(FlowStatus, string)>> GetAll()
 		{
-			throw new NotImplementedException();
+			return _flowStatusRepository.GetAll();
 		}
 
 		public FlowStatus GetFlow(string id)

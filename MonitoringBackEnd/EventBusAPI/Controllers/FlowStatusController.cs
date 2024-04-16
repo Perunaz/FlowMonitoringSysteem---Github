@@ -28,5 +28,11 @@ namespace EventBusAPI.Controllers
 			_rabbitMQProducer.PublishEvent(flowStatus, "flowstatus", "flowstatus_created", "");
 			return flowStatus;
 		}
-	}
+
+        [HttpGet("getAllFlowStatuses")]
+        public async Task<IEnumerable<(FlowStatus, string)>> GetAllFlowStatuses()
+        {
+			return await _flowStatusService.GetAll();
+        }
+    }
 }

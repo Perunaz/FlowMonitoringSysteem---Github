@@ -6,6 +6,6 @@ namespace DomainServices.Services.Interface
 	{
 		public FlowStatus GetFlow(string id);
 		public Task CreateFlowStatus(FlowStatus flowStatus);
-		public IEnumerable<FlowStatus> GetAll();
+		public Task<IEnumerable<(FlowStatus, string)>> GetAll();
 	}
 }
