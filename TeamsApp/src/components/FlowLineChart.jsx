@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 const series = [
   {
@@ -32,7 +32,6 @@ export default class FlowLineChart extends PureComponent {
 
   render() {
     return (
-      <ResponsiveContainer width="100%" height="100%">
         <LineChart width={500} height={300}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="category" type="category" allowDuplicatedCategory={false} />
@@ -43,7 +42,6 @@ export default class FlowLineChart extends PureComponent {
             <Line dataKey="value" data={s.data} name={s.name} key={s.name} />
           ))}
         </LineChart>
-      </ResponsiveContainer>
     );
   }
 }

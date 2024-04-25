@@ -24,7 +24,7 @@ namespace EventBusAPI.RabbitMQ.Producers
 			_password = configuration.GetValue<string>("RabbitMQ:Password");
 		}
 
-        public void Connect(string queueName)
+        public void Connect(string exchangeName)
 		{
 			ConnectionFactory factory = new ConnectionFactory
 			{
@@ -37,7 +37,7 @@ namespace EventBusAPI.RabbitMQ.Producers
 			connection = factory.CreateConnection();
 			channel = connection.CreateModel();
 
-			channel.QueueDeclare(queueName, false, false, false, null);
+			channel.ExchangeDeclare(exchange: exchangeName, type: ExchangeType.Fanout);
 		}
 
 		public void Disconnect()
@@ -53,11 +53,11 @@ namespace EventBusAPI.RabbitMQ.Producers
 			connection = null;
 		}
 
-		public void SendMessage<T>(T message, string queueName)
+		public void SendMessage<T>(T message, string exchangeName)
 		{
             var json = JsonConvert.SerializeObject(message);
 			byte[] messageBody = Encoding.UTF8.GetBytes(json);
-			channel.BasicPublish(string.Empty, queueName, null, messageBody);
+			channel.BasicPublish(exchange: exchangeName, routingKey: string.Empty, basicProperties: null, body: messageBody);
 		}
 	}
 }

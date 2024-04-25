@@ -2,18 +2,16 @@
 import {
   FluentProvider,
   teamsLightTheme,
-  teamsDarkTheme,
-  teamsHighContrastTheme,
   Spinner,
   tokens,
 } from "@fluentui/react-components";
 import { HashRouter as Router, Navigate, Route, Routes } from "react-router-dom";
 import { useTeamsUserCredential } from "@microsoft/teamsfx-react";
-import Privacy from "./Privacy";
-import TermsOfUse from "./TermsOfUse";
+import Privacy from "../components/Privacy";
+import TermsOfUse from "../components/TermsOfUse";
 import Tab from "./Tab";
-import { TeamsFxContext } from "./Context";
-import config from "./sample/lib/config";
+import { TeamsFxContext } from "../components/Context";
+import config from "../components/config/config";
 
 /**
  * The main app which handles the initialization and routing
@@ -28,14 +26,10 @@ export default function App() {
     <TeamsFxContext.Provider value={{ theme, themeString, teamsUserCredential }}>
       <FluentProvider
         theme={
-          themeString === "dark"
-            ? teamsDarkTheme
-            : themeString === "contrast"
-            ? teamsHighContrastTheme
-            : {
-                ...teamsLightTheme,
-                colorNeutralBackground3: "#eeeeee",
-              }
+          {
+            ...teamsLightTheme,
+            colorNeutralBackground3: "#eeeeee",
+          }
         }
         style={{ background: tokens.colorNeutralBackground3 }}
       >

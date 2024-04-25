@@ -1,5 +1,6 @@
 .narrow {
   width: 900px;
+  height: 100%;
   margin: 0 auto;
 }
 
@@ -86,12 +87,6 @@ pre::-webkit-scrollbar {
   border-color: #ffffff;
   border-width: thin;
   border-style: solid;
-}
-
-.dark pre,
-.dark code,
-.dark div.error {
-  background-color: #1b1b1b;
 }
 
 .error {

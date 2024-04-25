@@ -14,7 +14,8 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.8.0",
-    "react-scripts": "^5.0.1"
+    "react-scripts": "^5.0.1",
+    "recharts": "^2.12.6"
   },
   "devDependencies": {
     "@types/node": "^14.0.0",
@@ -27,7 +28,7 @@
   "scripts": {
     "dev:teamsfx": "concurrently \"npm run dev-tab:teamsfx\" \"npm run dev-api:teamsfx\"",
     "dev-tab:teamsfx": "env-cmd --silent -f .localConfigs npm run start",
-    "dev-api:teamsfx": "cd api && npm run dev:teamsfx",
+    "dev-api:teamsfx": "cd api && npm run start",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "echo \"Error: no test specified\" && exit 1",

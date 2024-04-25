@@ -46,7 +46,7 @@ namespace Infrastructure.Repositories
 				_influxDBService.Write(write =>
 				{
 					var point = PointData.Measurement("flowStatus")
-						.Tag("flow", flowStatus.FlowId.ToString())
+						.Tag("flowId", flowStatus.FlowId.ToString())
 						.Field("value", flowStatus.StateCode)
                         .Timestamp(DateTime.UtcNow, WritePrecision.Ns);
 
