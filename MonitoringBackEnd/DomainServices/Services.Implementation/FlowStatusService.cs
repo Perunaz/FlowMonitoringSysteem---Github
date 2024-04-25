@@ -23,9 +23,9 @@ namespace DomainServices.Services.Implementation
 			return _flowStatusRepository.WriteFlowStatus(flowStatus);
 		}
 
-		public Task<IEnumerable<FlowStatusModel>> GetAll()
+		public async Task<IEnumerable<FlowStatusModel>> GetAll()
 		{
-			return _flowStatusRepository.GetAll();
+			return await _flowStatusRepository.GetAll();
 		}
 
 		public FlowStatus GetFlow(string id)

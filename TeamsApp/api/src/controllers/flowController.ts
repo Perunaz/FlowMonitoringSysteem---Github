@@ -8,7 +8,6 @@ class FlowController {
     constructor(rabbitMQService: RabbitMQService) {
         this.rabbitMQService = rabbitMQService;
         this.lastFlowStatusCreatedEvent = null;
-		this.AllFlowStatusesEvent
     }
 
     async listenForFlowStatusEvents(): Promise<void> {
@@ -34,14 +33,16 @@ class FlowController {
         }
     }
 
-	getAllFlowStatusesEvent(req: Request, res: Response): void {
-        if (this.lastFlowStatusCreatedEvent) {
-            res.status(200).json({
-                message: "All Flow Statuses Event",
-                event: this.lastFlowStatusCreatedEvent
-            });
-        } else {
-            res.status(404).json({ message: "No Flow Status Created Event found" });
+	async getAllFlowStatusesEvent(req: Request, res: Response): Promise<void> {
+        try {
+            await this.rabbitMQService.connect();
+            await this.rabbitMQService.consumeRPCEvents("getAllFlowStatuses", "", (eventData) =>
+                res.status(200).json(eventData)
+            );
+
+        } catch (error) {
+            console.error("Error processing Get All Flow statuses event:", error);
+            res.status(404).json({ message: "No All Flow Statuses Event found" });
         }
     }
 

@@ -23,6 +23,7 @@ builder.Services.AddScoped<IFlowStatusRepository, FlowStatusRepository>();
 builder.Services.AddScoped<IFlowStatusService, FlowStatusService>();
 
 builder.Services.AddScoped<IRabbitMQProducer, RabbitMQProducer>();
+builder.Services.AddScoped<IRabbitMQRPCProducer, RabbitMQRPCProducerFlowStatus>();
 
 var app = builder.Build();
 
@@ -31,6 +32,22 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Connect to RabbitMQ at startup
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+	using var scope = app.Services.CreateScope();
+	var rpcProducer = scope.ServiceProvider.GetRequiredService<IRabbitMQRPCProducer>();
+	rpcProducer.Connect();  // Establish the RabbitMQ connection
+});
+
+// Create a scope for disconnecting from RabbitMQ
+app.Lifetime.ApplicationStopping.Register(() =>
+{
+	using var scope = app.Services.CreateScope();
+	var rpcProducer = scope.ServiceProvider.GetRequiredService<IRabbitMQRPCProducer>();
+	rpcProducer.Disconnect();  // Clean up the RabbitMQ connection
+});
 
 app.Services.UseScheduler(scheduler =>
 {
