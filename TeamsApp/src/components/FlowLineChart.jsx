@@ -1,47 +1,44 @@
 import React, { PureComponent } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-
-const series = [
-  {
-    name: 'Series 1',
-    data: [
-      { category: 'A', value: Math.random() },
-      { category: 'B', value: Math.random() },
-      { category: 'C', value: Math.random() },
-    ],
-  },
-  {
-    name: 'Series 2',
-    data: [
-      { category: 'B', value: Math.random() },
-      { category: 'C', value: Math.random() },
-      { category: 'D', value: Math.random() },
-    ],
-  },
-  {
-    name: 'Series 3',
-    data: [
-      { category: 'C', value: Math.random() },
-      { category: 'D', value: Math.random() },
-      { category: 'E', value: Math.random() },
-    ],
-  },
-];
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 export default class FlowLineChart extends PureComponent {
-
   render() {
+    const { flows } = this.props;
+    console.log(flows);
+
+    // Define a list of colors for the lines
+    const lineColors = [
+      "#8884d8", // Purple/Blue
+      "#82ca9d", // Light Green
+      "#ffc658", // Orange/Yellow
+      "#ff7300", // Orange
+      "#d0ed57", // Lime Green
+      "#a4de6c", // Light Lime
+    ];
+
     return (
-        <LineChart width={500} height={300}>
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="category" type="category" allowDuplicatedCategory={false} />
-          <YAxis dataKey="value" />
+          <XAxis dataKey="time" type="category" allowDuplicatedCategory={false} />
+          <YAxis 
+            dataKey="statecode" 
+            domain={[-0.1, 1.1]}
+            ticks={[0, 1]} 
+          />
           <Tooltip />
           <Legend />
-          {series.map((s) => (
-            <Line dataKey="value" data={s.data} name={s.name} key={s.name} />
+          {flows.map((s, index) => (
+            <Line
+              key={s.name}
+              dataKey="statecode"
+              data={s.data}
+              name={s.name}
+              stroke={lineColors[index % lineColors.length]}
+            />
           ))}
         </LineChart>
+      </ResponsiveContainer>
     );
   }
 }

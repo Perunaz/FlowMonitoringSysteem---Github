@@ -15,15 +15,6 @@ class FlowRouter {
     }
 
     private initializeRoutes(): void {
-        this.router.get("/lastFlowStatus", async (req: Request, res: Response) => {
-            try {
-                await this.flowController.getLastFlowStatusCreatedEvent(req, res);
-            } catch (error) {
-                console.error("Error fetching the last event:", error);
-                res.status(500).json({ message: "Internal server error" });
-            }
-		});
-
         this.router.get("/", async (req: Request, res: Response) => {
             try {
                 await this.flowController.getAllFlowStatusesEvent(req, res);

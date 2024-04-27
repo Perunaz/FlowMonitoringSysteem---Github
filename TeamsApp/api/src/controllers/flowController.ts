@@ -1,13 +1,24 @@
-import RabbitMQService from "../../rabbitMQService"
+import RabbitMQService from "../../rabbitMQService";
+import WebSocket from 'ws';
 import { Request, Response } from "express";
 
 class FlowController {
     private rabbitMQService: RabbitMQService;
+    private wss: WebSocket.Server;
     private lastFlowStatusCreatedEvent: any;
 
-    constructor(rabbitMQService: RabbitMQService) {
+    constructor(rabbitMQService: RabbitMQService, wss: WebSocket.Server) {
         this.rabbitMQService = rabbitMQService;
+        this.wss = wss;
         this.lastFlowStatusCreatedEvent = null;
+
+        this.setupWebSocket();
+    }
+
+    setupWebSocket() {
+        this.wss.on('connection', () => {
+            console.log('New WebSocket connection established.');
+        });
     }
 
     async listenForFlowStatusEvents(): Promise<void> {
@@ -26,8 +37,12 @@ class FlowController {
 
     async handleFlowStatusCreatedEvent(eventData: any): Promise<void> {
         try {
-            console.log("Flow status created event processed:", eventData);
-            this.lastFlowStatusCreatedEvent = eventData;
+            // Broadcast to all connected WebSocket clients
+            this.wss.clients.forEach((client) => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(JSON.stringify(eventData));
+                }
+            });
         } catch (error) {
             console.error("Error processing Flow status created event:", error);
         }
@@ -43,17 +58,6 @@ class FlowController {
         } catch (error) {
             console.error("Error processing Get All Flow statuses event:", error);
             res.status(404).json({ message: "No All Flow Statuses Event found" });
-        }
-    }
-
-    getLastFlowStatusCreatedEvent(req: Request, res: Response): void {
-        if (this.lastFlowStatusCreatedEvent) {
-            res.status(200).json({
-                message: "Last Flow Status Created Event",
-                event: this.lastFlowStatusCreatedEvent
-            });
-        } else {
-            res.status(404).json({ message: "No Flow Status Created Event found" });
         }
     }
 }

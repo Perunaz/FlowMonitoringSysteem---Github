@@ -92,3 +92,12 @@ pre::-webkit-scrollbar {
 .error {
   color: red;
 }
+
+.chart-container {
+  width: 100%; /* Takes the full width of its container */
+  height: 40vh; /* 60% of the viewport height */
+  min-height: 300px; /* Minimum height to avoid overly small charts */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

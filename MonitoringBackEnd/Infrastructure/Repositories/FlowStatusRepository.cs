@@ -16,31 +16,37 @@ namespace Infrastructure.Repositories
 			_influxDBService = influxDBService;
 		}
 
-        public async Task<IEnumerable<FlowStatusModel>> GetAll()
-        {
-            var results = await _influxDBService.QueryAsync(async query =>
-            {
-                var flux = "from(bucket:\"poc-bucket\") |> range(start: 0)";
-                var tables = await query.QueryAsync(flux, "fourtop-ict");
-                return tables.SelectMany(table =>
-                table.Records.Select(record =>
-                    {
+		public async Task<IEnumerable<FlowStatusModel>> GetAll()
+		{
+			var results = await _influxDBService.QueryAsync(async query =>
+			{
+				var currentTime = DateTime.UtcNow;
+				var fiveMinutesAgo = currentTime.AddMinutes(-5);
+
+				// Create the Flux query to get the last 5 minutes of data
+				var flux = $"from(bucket:\"poc-bucket\") |> range(start: {fiveMinutesAgo:o}, stop: {currentTime:o})";
+
+				var tables = await query.QueryAsync(flux, "fourtop-ict");
+
+				return tables.SelectMany(table =>
+					table.Records.Select(record =>
+					{
 						Console.WriteLine(record);
-                        var flowStatus = new FlowStatusModel(
-                            record.GetValueByKey("flowId").ToString(),
-							int.Parse(record.GetValue().ToString()), 
+						var flowStatus = new FlowStatusModel(
+							record.GetValueByKey("flowId").ToString(),
+							int.Parse(record.GetValue().ToString()),
 							record.GetTime().ToString()
 						);
 
-                        return flowStatus;
-                    })
-                );
-            });
-            
-            return results;
-        }
+						return flowStatus;
+					})
+				);
+			});
 
-        public async Task<FlowStatus> WriteFlowStatus(FlowStatus flowStatus)
+			return results;
+		}
+
+		public async Task<FlowStatus> WriteFlowStatus(FlowStatus flowStatus)
 		{
 			await Task.Run(() =>
 			{

@@ -49,6 +49,8 @@ app.Lifetime.ApplicationStopping.Register(() =>
 	rpcProducer.Disconnect();  // Clean up the RabbitMQ connection
 });
 
+var random = new Random();
+
 app.Services.UseScheduler(scheduler =>
 {
 	scheduler.Schedule(() =>
@@ -56,12 +58,28 @@ app.Services.UseScheduler(scheduler =>
 		using var scope = app.Services.CreateScope();
 		var serviceProvider = scope.ServiceProvider;
 
-		var flowStatus = new FlowStatus("3fa85f64-5717-4562-b3fc-2c963f66afa6", 1);
+		// Set a probability threshold for status to be 1
+		const int probabilityThreshold = 95; // 95% chance of getting 1
+
+		// Function to generate random status with 95% chance of being 1
+		int GetRandomStatus()
+		{
+			return random.Next(0, 101) <= probabilityThreshold ? 1 : 0;
+		}
+
+		// Generate random status with 95% probability of being 1
+		var flowStatus1 = new FlowStatus("3fa85f64-5717-4562-b3fc-2c963f66afa6", GetRandomStatus());
+		var flowStatus2 = new FlowStatus("12345678-1234-1234-1234-1234567890ab", GetRandomStatus());
+		var flowStatus3 = new FlowStatus("a82c7ef9-4a6e-4c2f-8cba-71444a7e153f", GetRandomStatus());
 
 		var controller = serviceProvider.GetRequiredService<FlowStatusController>();
-		controller.AddFlowStatus(flowStatus);
+
+		// Add FlowStatus instances to the controller
+		controller.AddFlowStatus(flowStatus1);
+		controller.AddFlowStatus(flowStatus2);
+		controller.AddFlowStatus(flowStatus3);
 	})
-	.EveryFiveSeconds();
+	.EveryFiveSeconds(); // Schedule to run every 5 seconds
 });
 
 app.Run();
