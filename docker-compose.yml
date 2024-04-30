@@ -94,7 +94,7 @@ services:
     build:
       context: ./MonitoringBackEnd
       dockerfile: Dockerfile
-    container_name: backendInfrastructure
+    container_name: backend
     depends_on:
       rabbitmq:
         condition: service_healthy
