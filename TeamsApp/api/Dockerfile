@@ -11,9 +11,6 @@ COPY . /app
 # Install app dependencies
 RUN npm install --production
 
-# Build and optimize react app
-RUN npm run build
-
 EXPOSE 7071
 
 # Start the app (as defined in package.json)

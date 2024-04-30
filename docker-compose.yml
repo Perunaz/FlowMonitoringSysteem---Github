@@ -61,7 +61,7 @@ services:
       dockerfile: Dockerfile
     container_name: teamsapp
     depends_on:
-      - rabbitmq
+      - teamsapi
     ports:
       - "53000:53000"
     environment:
@@ -77,6 +77,18 @@ services:
       - export SSL_KEY_FILE=${TEAMS_SSL_KEY_FILE}
     volumes:
     - ~/.fx/certificate:/certificate:ro
+
+  teamsapi:
+    build:
+      context: ./TeamsApp/api
+      dockerfile: Dockerfile
+    container_name: teamsapi
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "7071:7071"
+      - "8080:8080"
 
   backend:
     build:
