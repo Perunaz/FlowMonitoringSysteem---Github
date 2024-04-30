@@ -12,8 +12,6 @@ namespace EventBusAPI.RabbitMQ.Producers
 	{
 		private string _hostName;
 		private int _port;
-		private string _userName;
-		private string _password;
 		private IConnection connection;
 		private IModel channel;
 
@@ -23,8 +21,6 @@ namespace EventBusAPI.RabbitMQ.Producers
 		{
 			_hostName = configuration.GetValue<string>("RabbitMQ:HostName");
 			_port = configuration.GetValue<int>("RabbitMQ:Port");
-			_userName = configuration.GetValue<string>("RabbitMQ:UserName");
-			_password = configuration.GetValue<string>("RabbitMQ:Password");
 
 			_flowStatusController = flowStatusController;
 		}
@@ -35,8 +31,6 @@ namespace EventBusAPI.RabbitMQ.Producers
 			{
 				HostName = _hostName,
 				Port = _port,
-				UserName = _userName,
-				Password = _password,
 			};
 
 			connection = factory.CreateConnection();

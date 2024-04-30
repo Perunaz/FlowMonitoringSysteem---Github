@@ -158,8 +158,15 @@ class RabbitMQService {
       this.rpcQueueName,
       (msg) => {
         if (msg && msg.properties.correlationId === correlationId) {
-          const eventData = JSON.parse(msg.content.toString());
-          callback(eventData);
+			try {
+				const eventData = JSON.parse(msg.content.toString());
+				callback(eventData);
+			  } catch (error) {
+				console.error("Failed to parse message content:", error);
+				// Log the problematic message content for debugging
+				console.error("Raw message content:", msg.content.toString());
+				// Handle the error (e.g., requeue the message or send to a dead-letter queue)
+			  }
 		  if (typeof msg.fields.consumerTag === "string") {
 			this.channelRPC?.cancel(msg.fields.consumerTag);
 		  }
@@ -190,6 +197,13 @@ class RabbitMQService {
       }
     });
   }
-}
+
+  async restartConnection(): Promise<void> { 	
+		this.connection = null;
+		this.channelRPC = null;
+		this.rpcQueueName = null;
+		return await this.connect();
+	};
+  }
 
 export default RabbitMQService;

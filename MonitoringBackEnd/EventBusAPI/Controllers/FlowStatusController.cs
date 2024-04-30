@@ -23,9 +23,9 @@ namespace EventBusAPI.Controllers
 			_flowStatusService.CreateFlowStatus(flowStatus);
 
 			//send the inserted product data to the queue and consumer will listening this data from queue
-			_rabbitMQProducer.Connect("flowstatus_created");
-			_rabbitMQProducer.SendMessage(flowStatus, "flowstatus_created");
-			_rabbitMQProducer.Disconnect();
+			//_rabbitMQProducer.Connect("flowstatus_created");
+			//_rabbitMQProducer.SendMessage(flowStatus, "flowstatus_created");
+			//_rabbitMQProducer.Disconnect();
 
 			return flowStatus;
 		}

@@ -1,8 +1,8 @@
-version: '3.8'
+version: '3.4'
 services:
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
-    container_name: rabbitmq
+    container_name: rabbitMQ
     volumes:
       - rabbitmqdata:/var/lib/rabbitmq
       - "./rabbitmq:/etc/FlowMonitoringSysteem/"
@@ -10,11 +10,17 @@ services:
       - "15672:15672"
       - "5672:5672"
     environment:
-      - RABBITMQ_CONFIG_FILE=./Rabbitmq/rabbitmq.conf
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
 
   influxdb:
     image: influxdb:latest
-    container_name: influxdb
+    container_name: influxDB
     ports:
       - "8086:8086"
     volumes:
@@ -26,14 +32,20 @@ services:
       - INFLUXDB_USER=${INFLUXDB_USER}
       - INFLUXDB_USER_PASSWORD=${INFLUXDB_USER_PASSWORD}
       - INFLUXDB_LOGGING_LEVEL=debug
+    healthcheck:
+      test: "curl -f http://localhost:8086/ping"
+      interval: 5s
+      timeout: 10s
+      retries: 5
 
   notficationservice:
     build:
       context: ./NotificationService
       dockerfile: Dockerfile
-    container_name: notificationservice
+    container_name: notificationService
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
     ports:
       - "3100:3100"
     environment:
@@ -48,7 +60,7 @@ services:
       dockerfile: Dockerfile
     container_name: teamsapp
     depends_on:
-      - rabbitmq
+      - teamsapi
     ports:
       - "53000:53000"
     environment:
@@ -65,24 +77,33 @@ services:
     volumes:
     - ~/.fx/certificate:/certificate:ro
 
+  teamsapi:
+    build:
+      context: ./TeamsApp/api
+      dockerfile: Dockerfile
+    container_name: teamsapi
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "7071:7071"
+      - "8080:8080"
+
   backend:
     build:
       context: ./MonitoringBackEnd
       dockerfile: Dockerfile
     container_name: backend
     depends_on:
-      - rabbitmq
-      - influxdb
+      rabbitmq:
+        condition: service_healthy
+      influxdb:
+        condition: service_healthy
     ports:
-      - "5262:5262"
-      - "7212:7212"
+      - "3000:3000"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=https://+:7212;http://+:5262
-      - ASPNETCORE_Kestrel__Certificates__Default__Password=${CERTIFICATE_PASSWORD}
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
-    volumes:
-      - ~/.aspnet/https:/https:ro
+      - ASPNETCORE_URLS=http://+:3000
 
 volumes:
   rabbitmqdata:

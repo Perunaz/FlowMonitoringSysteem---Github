@@ -31,7 +31,6 @@ namespace Infrastructure.Repositories
 				return tables.SelectMany(table =>
 					table.Records.Select(record =>
 					{
-						Console.WriteLine(record);
 						var flowStatus = new FlowStatusModel(
 							record.GetValueByKey("flowId").ToString(),
 							int.Parse(record.GetValue().ToString()),

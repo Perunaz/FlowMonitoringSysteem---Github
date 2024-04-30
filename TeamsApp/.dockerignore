@@ -1,0 +1,4 @@
+# Ignore the api folder
+api/
+# Ignore other files/folders that should not be copied
+node_modules/
