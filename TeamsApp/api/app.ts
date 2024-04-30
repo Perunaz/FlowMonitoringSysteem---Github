@@ -40,10 +40,10 @@ app.use(cast);
 app.use(entityNotFound);
 
 // Start the HTTP server
-const PORT = process.env.WS_PORT || 8080;
-server.listen(PORT, () => {
-  console.log(`WebSocket server listening on port ${PORT}`);
-});
+// const PORT = process.env.WS_PORT || 8080;
+// server.listen(PORT, () => {
+//   console.log(`WebSocket server listening on port ${PORT}`);
+// });
 
 flowController
   .listenForFlowStatusEvents()

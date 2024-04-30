@@ -5,12 +5,10 @@ import { Request, Response } from "express";
 class FlowController {
     private rabbitMQService: RabbitMQService;
     private wss: WebSocket.Server;
-    private lastFlowStatusCreatedEvent: any;
 
     constructor(rabbitMQService: RabbitMQService, wss: WebSocket.Server) {
         this.rabbitMQService = rabbitMQService;
         this.wss = wss;
-        this.lastFlowStatusCreatedEvent = null;
 
         this.setupWebSocket();
     }
@@ -57,6 +55,7 @@ class FlowController {
 
         } catch (error) {
             console.error("Error processing Get All Flow statuses event:", error);
+            await this.rabbitMQService.restartConnection();
             res.status(404).json({ message: "No All Flow Statuses Event found" });
         }
     }

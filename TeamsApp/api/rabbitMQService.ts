@@ -197,6 +197,13 @@ class RabbitMQService {
       }
     });
   }
-}
+
+  async restartConnection(): Promise<void> { 	
+		this.connection = null;
+		this.channelRPC = null;
+		this.rpcQueueName = null;
+		return await this.connect();
+	};
+  }
 
 export default RabbitMQService;
