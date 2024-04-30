@@ -5,6 +5,7 @@ import helmet from "helmet";
 import dotenv from 'dotenv';
 import { createServer } from 'http';
 import WebSocket from 'ws';
+import { validation, cast, entityNotFound } from "./errors";
 
 import RabbitMQService from "./rabbitMQService";
 import FlowController from "./src/controllers/flowController";
@@ -26,13 +27,17 @@ const wss = new WebSocket.Server({ server });
 
 
 // Create an instance of the RabbitMQService with the connection URL and exchange
-const rabbitMQService = new RabbitMQService(process.env.RABBITMQ_URL || "amqp://rabbitmq");
+const rabbitMQService = new RabbitMQService(process.env.RABBITMQ_URL || "amqp://rabbitmq:5672");
 const flowController = new FlowController(rabbitMQService, wss);
 
 const flowRouter = new FlowRouter(flowController);
 
 app.use("/api/v1/flow", flowRouter.getRouter());
 
+// error handling middleware
+app.use(validation);
+app.use(cast);
+app.use(entityNotFound);
 
 // Start the HTTP server
 const PORT = process.env.WS_PORT || 8080;
