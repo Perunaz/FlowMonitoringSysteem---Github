@@ -3,6 +3,10 @@ param functionAppSKU string
 param aadAppClientId string
 param aadAppTenantId string
 param aadAppOauthAuthorityHost string
+param apiClientId string
+@secure()
+param apiClientSecret string
+param apiTenantId string
 param staticWebAppSku string
 @secure()
 param aadAppClientSecret string
@@ -93,6 +97,18 @@ resource functionApp 'Microsoft.Web/sites@2021-02-01' = {
         {
           name: 'M365_AUTHORITY_HOST'
           value: aadAppOauthAuthorityHost
+        }
+        {
+          name: 'REACT_APP_API_CLIENT_ID'
+          value: apiClientId
+        }
+        {
+          name: 'REACT_APP_API_CLIENT_SECRET'
+          value: apiClientSecret
+        }
+        {
+          name: 'REACT_APP_API_TENANT_ID'
+          value: apiTenantId
         }
         {
           name: 'M365_APPLICATION_ID_URI'
