@@ -22,7 +22,7 @@ builder.Services.AddScoped<FlowStatusController>();
 builder.Services.AddScheduler();
 builder.Services.AddScoped<IFlowStatusRepository, FlowStatusRepository>();
 builder.Services.AddScoped<IFlowStatusService, FlowStatusService>();
-builder.Services.AddScoped<IRabbitMQProducer, RabbitMQProducer>();
+builder.Services.AddScoped<IRabbitMQProducer, RabbitMQExchangeProducer>();
 builder.Services.AddScoped<IRabbitMQRPCProducer, RabbitMQRPCProducerFlowStatus>();
 
 builder.Services.AddScoped<TokenManagementService>();

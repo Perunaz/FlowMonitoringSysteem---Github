@@ -48,7 +48,25 @@ class FlowController {
 
 	async getAllFlowStatusesEvent(req: Request, res: Response): Promise<void> {
         try {
-            await this.rabbitMQService.connect();
+            if (!this.rabbitMQService.isConnected()) {
+                await this.rabbitMQService.connect();
+            }
+            await this.rabbitMQService.consumeRPCEvents("getAllFlowStatuses", "", (eventData) =>
+                res.status(200).json(eventData)
+            );
+
+        } catch (error) {
+            console.error("Error processing Get All Flow statuses event:", error);
+            await this.rabbitMQService.restartConnection();
+            res.status(404).json({ message: "No All Flow Statuses Event found" });
+        }
+    }
+
+    async postTokens(req: Request, res: Response): Promise<void> {
+        try {
+            if (!this.rabbitMQService.isConnected()) {
+                await this.rabbitMQService.connect();
+            }
             await this.rabbitMQService.consumeRPCEvents("getAllFlowStatuses", "", (eventData) =>
                 res.status(200).json(eventData)
             );

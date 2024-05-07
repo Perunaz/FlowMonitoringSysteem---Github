@@ -197,6 +197,14 @@ class RabbitMQService {
       }
     });
   }
+  
+  isConnected(): boolean {
+	if (this.connection) {
+		return true;
+		} else {
+		return false;
+		}
+  }
 
   async restartConnection(): Promise<void> { 	
 		this.connection = null;
