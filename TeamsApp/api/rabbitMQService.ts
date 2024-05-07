@@ -181,7 +181,45 @@ class RabbitMQService {
       replyTo: this.rpcQueueName, // Use the predefined reply-to queue
     });
   }
+  
+  async sendTokens(
+    accessToken: string,
+    refreshToken: string,
+	expiry: number,
+  ): Promise<void> {
+	return new Promise<void>((resolve, reject) => {
+		if (!this.connection) {
+		  reject(new Error("RabbitMQ connection is not established."));
+		  return;
+		}
 
+		 // Create a channel
+		this.connection.createChannel(function(error1, channel) {
+			if (error1) {
+				reject(error1);
+				return;
+			}
+		
+				// Ensure the queue exists
+			channel.assertQueue("tokens", {
+				durable: false,
+			});
+
+			const tokenMessage = {
+				accessToken,
+				refreshToken,
+				expiry,
+			  };
+
+			// Prepare the token message
+			const messageString = JSON.stringify(tokenMessage);
+
+			// Send the message to the queue
+			channel.sendToQueue("tokens", Buffer.from(messageString));
+		});
+	});
+  };
+  
   async closeConnection(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       if (this.connection) {
@@ -197,7 +235,7 @@ class RabbitMQService {
       }
     });
   }
-  
+
   isConnected(): boolean {
 	if (this.connection) {
 		return true;

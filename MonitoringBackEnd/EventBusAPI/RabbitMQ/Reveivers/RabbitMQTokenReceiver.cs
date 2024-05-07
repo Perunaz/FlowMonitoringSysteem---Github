@@ -1,7 +1,9 @@
 ﻿using EventBusAPI.RabbitMQ.IReceiver;
+using Newtonsoft.Json.Linq;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
+using System.Text.Json;
 
 namespace EventBusAPI.RabbitMQ.Reveivers
 {
@@ -11,11 +13,13 @@ namespace EventBusAPI.RabbitMQ.Reveivers
         private int _port;
         private IConnection connection;
         private IModel channel;
+        private TokenManagementService _tokenManagementService;
 
-        public RabbitMQTokenReceiver(IConfiguration configuration)
+        public RabbitMQTokenReceiver(IConfiguration configuration, TokenManagementService tokenManagementService)
         {
             _hostName = configuration.GetValue<string>("RabbitMQ:HostName");
             _port = configuration.GetValue<int>("RabbitMQ:Port");
+            _tokenManagementService = tokenManagementService;
         }
 
         public void Connect()
@@ -60,7 +64,16 @@ namespace EventBusAPI.RabbitMQ.Reveivers
 		{
 			var body = ea.Body.ToArray();
 			var message = Encoding.UTF8.GetString(body);
-			Console.WriteLine($" [x] Received {message}");
+			var jsonMessage = JsonDocument.Parse(message);
+
+            Console.WriteLine(jsonMessage.RootElement.ToString());
+            Console.WriteLine(message);
+
+			var accessToken = jsonMessage.RootElement.GetProperty("accessToken").GetString();
+			var refreshToken = jsonMessage.RootElement.GetProperty("refreshToken").GetString();
+			var expiry = jsonMessage.RootElement.GetProperty("expiry").GetInt32();
+
+            _tokenManagementService.UseNewtoken(accessToken, refreshToken, expiry);
 		}
 	}
 }

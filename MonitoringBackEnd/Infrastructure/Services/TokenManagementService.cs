@@ -127,6 +127,24 @@ public class TokenManagementService
 		};
 	}
 
+	public void UseNewtoken(
+		string accessToken,
+		string refreshToken,
+		int expiry)
+	{
+		if (!_tokenStore.ContainsKey(_clientId))
+		{
+			_tokenStore[_clientId] = new TokenData();
+		}
+
+		var expireTime = DateTime.UtcNow.AddSeconds(expiry);
+
+		var tokenData = _tokenStore[_clientId];
+		tokenData.AccessToken = accessToken;
+		tokenData.RefreshToken = refreshToken;
+		tokenData.Expiry = expireTime;
+	}
+
 	private bool IsTokenExpired(string accessToken)
 	{
 		return string.IsNullOrEmpty(accessToken) || DateTime.UtcNow > _tokenStore[_clientId].Expiry;

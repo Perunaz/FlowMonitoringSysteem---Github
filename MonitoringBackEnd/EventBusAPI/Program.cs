@@ -8,6 +8,8 @@ using Infrastructure.Repositories;
 using Coravel;
 using Core.Domain.Flow;
 using EventBusAPI.Controllers;
+using EventBusAPI.RabbitMQ.IReceiver;
+using EventBusAPI.RabbitMQ.Reveivers;
 
 // Create WebApplication builder
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +26,7 @@ builder.Services.AddScoped<IFlowStatusRepository, FlowStatusRepository>();
 builder.Services.AddScoped<IFlowStatusService, FlowStatusService>();
 builder.Services.AddScoped<IRabbitMQProducer, RabbitMQExchangeProducer>();
 builder.Services.AddScoped<IRabbitMQRPCProducer, RabbitMQRPCProducerFlowStatus>();
+builder.Services.AddScoped<IRabbitMQReceiver, RabbitMQTokenReceiver>();
 
 builder.Services.AddScoped<TokenManagementService>();
 builder.Services.AddScoped<PowerAutomateAPIService>();
@@ -46,7 +49,9 @@ app.Lifetime.ApplicationStarted.Register(() =>
 {
 	using var scope = app.Services.CreateScope();
 	var rpcProducer = scope.ServiceProvider.GetRequiredService<IRabbitMQRPCProducer>();
+	var tokenReceiver = scope.ServiceProvider.GetRequiredService<IRabbitMQReceiver>();
 	rpcProducer.Connect(); // Establish the RabbitMQ connection
+	tokenReceiver.Connect(); // Establish the RabbitMQ connection
 });
 
 // Clean up RabbitMQ connection upon stopping
@@ -54,7 +59,9 @@ app.Lifetime.ApplicationStopping.Register(() =>
 {
 	using var scope = app.Services.CreateScope();
 	var rpcProducer = scope.ServiceProvider.GetRequiredService<IRabbitMQRPCProducer>();
+	var tokenReceiver = scope.ServiceProvider.GetRequiredService<IRabbitMQReceiver>();
 	rpcProducer.Disconnect(); // Clean up the RabbitMQ connection
+	tokenReceiver.Disconnect(); // Clean up the RabbitMQ connection
 });
 
 // Schedule recurring tasks
