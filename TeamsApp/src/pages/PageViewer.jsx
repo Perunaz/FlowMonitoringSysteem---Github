@@ -111,6 +111,9 @@ export function PageViewer(props) {
   useEffect(() => {
     fetch('http://localhost:7071/api/v1/login', {
       method: 'GET',
+      headers: {
+        'Access-Control-Allow-Origin': '*' 
+      },
       redirect: 'follow', // Ensure the response follows any redirection
     })
       .then((response) => {
