@@ -98,7 +98,7 @@ app.Services.UseScheduler(scheduler =>
 			Console.WriteLine(ex.Message);
 		}
 	})
-	.EveryFifteenMinutes(); // Schedule to run every 5 seconds
+	.EveryFifteenMinutes();
 });
 
 // Start the application

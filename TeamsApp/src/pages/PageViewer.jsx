@@ -76,6 +76,12 @@ export function PageViewer(props) {
   const [selectedValue, setSelectedValue] = useState("dashboard");
 //  const [initialized, setInitialized] = useState(false);
   const [flowData, setFlowData] = useState([]);
+  const [lastStatusData, setLastStatusData] = useState([]);
+
+  const columns = [
+    { key: 'name', displayName: 'Flow Name' },
+    { key: 'lastStatus', displayName: 'Last Status' },
+  ];
 
   const onTabSelect = (event, data) => {
     setSelectedValue(data.value);
@@ -116,35 +122,40 @@ export function PageViewer(props) {
   //     });
   // }, []);
 
-  useEffect(() => { 
+  useEffect(() => {
     fetch("http://localhost:7071/api/v1/flow")
       .then((response) => response.json())
       .then((data) => {
-        // Group data by FlowId and process into the desired structure
         const flowMap = {};
-  
+
         data.forEach((item) => {
-          const { FlowId, StateCode, Time } = item;
+          const { FlowId, DisplayName, Status, Time } = item;
           if (!flowMap[FlowId]) {
-            flowMap[FlowId] = { name: FlowId, data: [] };
+            flowMap[FlowId] = { name: DisplayName, data: [] };
           }
           const timeOnly = new Date(Time).toLocaleTimeString("en-GB", {
             hour12: false,
           });
           flowMap[FlowId].data.push({
             time: timeOnly,
-            statecode: StateCode,
-            originalTime: Time,
+            status: Status,
+            originalTime: Time // Storing original time for sorting
           });
         });
-  
-        // Sort the 'data' arrays within each flowMap entry by 'originalTime'
+
         Object.values(flowMap).forEach((flow) => {
           flow.data.sort((a, b) => new Date(a.originalTime) - new Date(b.originalTime));
         });
-  
-        // Convert the map to an array and set the sorted data
+
         setFlowData(Object.values(flowMap));
+
+        // Extracting last status data
+        const lastStatus = Object.values(flowMap).map(flow => ({
+          name: flow.name,
+          lastStatus: flow.data[flow.data.length - 1].status
+        }));
+
+        setLastStatusData(lastStatus);
       })
       .catch((error) => {
         console.error("Error fetching flow data:", error);
@@ -166,7 +177,7 @@ export function PageViewer(props) {
                   <FlowLineChart flows={flowData} />
                 </div>
                 <div>
-                  <Table rowData={[]} columns={[]}/>
+                  <Table rowData={lastStatusData} columns={columns} />
                 </div>
               </>
             )}

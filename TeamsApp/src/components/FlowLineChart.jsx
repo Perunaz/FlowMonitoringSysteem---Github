@@ -15,19 +15,45 @@ const FlowLineChart = ({ flows }) => {
         "#a4de6c",
     ];
 
+    const statusMap = {
+        "Failed": 0,
+        "Succeeded": 1,
+    };
+
+    const getStatusValue = (status) => {
+        if (status in statusMap) {
+            return statusMap[status];
+        } else {
+            return 0; // Default to 0 if status is not found in statusMap
+        }
+    };
+
+    // Convert status values to numbers
+    const transformedData = flows.map(flow => ({
+        name: flow.name,
+        data: flow.data.map(entry => ({
+            ...entry,
+            status: getStatusValue(entry.status)
+        }))
+    }));
+
     return (
         <ResponsiveContainer width="100%" height="100%">
             <LineChart>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="time" type="category" allowDuplicatedCategory={false} />
-                <YAxis dataKey="statecode" domain={[-0.1, 1.1]} ticks={[0, 1]} />
+                <YAxis
+                    domain={[-0.1, 1.1]}
+                    ticks={[0, 1]}
+                    tickFormatter={(value) => value === 0 ? "Failed" : "Succeeded"} // Custom tick formatter
+                />
                 <Tooltip />
                 <Legend />
-                {flows.map((s, index) => (
+                {transformedData.map((s, index) => (
                     <Line
                         key={s.name}
                         type="monotone"
-                        dataKey="statecode"
+                        dataKey="status"
                         data={s.data || []}
                         name={s.name}
                         stroke={lineColors[index % lineColors.length]}
