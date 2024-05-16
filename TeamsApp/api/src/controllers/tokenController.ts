@@ -12,7 +12,7 @@ class TokenController {
         req: Request,
         res: Response
       ): Promise<void> {
-        const { accessToken, refreshToken, expiry } = req.body;
+        const { accessToken } = req.body;
       
         try {
           // Check if RabbitMQ service is connected, if not, establish connection
@@ -21,7 +21,7 @@ class TokenController {
           }
       
           // Send tokens to the specified queue (use a method in your RabbitMQ service)
-          await this.rabbitMQService.sendTokens(accessToken, refreshToken, expiry);
+          await this.rabbitMQService.sendTokens(accessToken);
       
           // Return success response
           res.status(200).json({ message: 'Tokens posted successfully.' });
@@ -33,6 +33,11 @@ class TokenController {
           // Return error response
           res.status(500).json({ message: 'Failed to post tokens event.' });
         }
+    }
+
+    setAccessToken(accessToken: string) {
+      console.log('setAccessToken');
+      this.rabbitMQService.setAccessToken(accessToken);
     }
 }
 

@@ -1,5 +1,5 @@
 // Function to check if token is valid
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 export const checkIfTokenIsValid = (token) => {
     if (!token) {

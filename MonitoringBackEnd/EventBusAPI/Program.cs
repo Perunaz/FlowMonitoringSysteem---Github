@@ -26,7 +26,7 @@ builder.Services.AddScoped<IFlowStatusRepository, FlowStatusRepository>();
 builder.Services.AddScoped<IFlowStatusService, FlowStatusService>();
 builder.Services.AddScoped<IRabbitMQProducer, RabbitMQExchangeProducer>();
 builder.Services.AddScoped<IRabbitMQRPCProducer, RabbitMQRPCProducerFlowStatus>();
-builder.Services.AddScoped<IRabbitMQReceiver, RabbitMQTokenReceiver>();
+builder.Services.AddScoped<IRabbitMQReceiver, RabbitMQRPCTokenReceiver>();
 
 builder.Services.AddScoped<TokenManagementService>();
 builder.Services.AddScoped<PowerAutomateAPIService>();
