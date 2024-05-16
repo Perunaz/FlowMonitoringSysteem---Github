@@ -72,8 +72,6 @@ namespace EventBusAPI.RabbitMQ.Reveivers
 			var accessToken = jsonMessage.RootElement.GetProperty("accessToken").GetString();
 			var refreshToken = jsonMessage.RootElement.GetProperty("refreshToken").GetString();
 			var expiry = jsonMessage.RootElement.GetProperty("expiry").GetInt32();
-
-            _tokenManagementService.UseNewtoken(accessToken, refreshToken, expiry);
 		}
 	}
 }

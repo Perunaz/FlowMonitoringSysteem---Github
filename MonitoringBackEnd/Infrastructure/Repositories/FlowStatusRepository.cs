@@ -53,7 +53,8 @@ namespace Infrastructure.Repositories
 				{
 					var point = PointData.Measurement("flowStatus")
 						.Tag("flowId", flowStatus.FlowId.ToString())
-						.Field("value", flowStatus.StateCode)
+						.Tag("name", flowStatus.DisplayName)
+						.Field("value", flowStatus.Status)
                         .Timestamp(DateTime.UtcNow, WritePrecision.Ns);
 
 					write.WritePoint(point, "poc-bucket", "fourtop-ict");

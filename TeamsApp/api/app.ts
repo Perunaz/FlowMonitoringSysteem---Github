@@ -37,7 +37,7 @@ const flowRouter = new FlowRouter(flowController);
 const tokenRouter = new TokenRouter(tokenController);
 
 app.use("/api/v1/flow", flowRouter.getRouter());
-app.use("/api/v1/token", tokenRouter.getRouter());
+//app.use("/api/v1/token", tokenRouter.getRouter());
 
 // error handling middleware
 app.use(validation);

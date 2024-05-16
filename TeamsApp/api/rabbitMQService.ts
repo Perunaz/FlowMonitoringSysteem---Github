@@ -34,7 +34,7 @@ class RabbitMQService {
 			}
 
 			if (!this.channelProducingTokenRPC) {
-				await this.setupChannelProducingRPC("token");
+				//await this.setupChannelProducingRPC("token");
 			}
 			return;
 		}
@@ -62,7 +62,7 @@ class RabbitMQService {
 
 						try {
 							await this.setupChannelReceivingRPC();
-							await this.setupChannelProducingRPC("token"); // Set up the channel and queue on successful connection
+							//await this.setupChannelProducingRPC("token"); // Set up the channel and queue on successful connection
 							resolve();
 						} catch (err) {
 							reject(err); // Handle setup errors

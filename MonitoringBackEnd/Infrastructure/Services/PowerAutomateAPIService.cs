@@ -33,8 +33,7 @@ public class PowerAutomateAPIService
 			if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
 			{
 				// Refresh token
-				var tokenData = await _tokenManagementService.RefreshAccessTokenAsync();
-				accessToken = tokenData.AccessToken;
+				accessToken = await _tokenManagementService.RefreshAccessTokenAsync();
 				httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
 				response = await httpClient.GetAsync(endpoint);
 			}
@@ -53,8 +52,8 @@ public class PowerAutomateAPIService
 		return await GetResourceAsync($"https://api.flow.microsoft.com/providers/Microsoft.ProcessSimple/environments/Default-{_tenantId}/flows/");
 	}
 
-	public async Task<string> GetResourceFromGraphCalendarAsync()
+	public async Task<string> GetResourceFromPowerAutomateFlowLastRunAsync(string flowId)
 	{
-		return await GetResourceAsync("https://graph.microsoft.com/v1.0/me/calendar");
+		return await GetResourceAsync($"https://api.flow.microsoft.com/providers/Microsoft.ProcessSimple/environments/Default-{_tenantId}/flows/{flowId}/runs?$top=1");
 	}
 }
