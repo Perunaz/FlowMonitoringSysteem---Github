@@ -10,24 +10,36 @@ namespace EventBusAPI.Controllers
 	public class FlowStatusController: ControllerBase
 	{
 		private readonly IFlowStatusService _flowStatusService;
-		private readonly IRabbitMQProducer _rabbitMQProducer;
+		private readonly IRabbitMQProducer _rabbitMQProducer; 
+        private static readonly Dictionary<Guid, string> _flowStatusDictionary = new Dictionary<Guid, string>();
 
-		public FlowStatusController(IFlowStatusService flowStatusService, IRabbitMQProducer rabbitMQProducer)
+
+        public FlowStatusController(IFlowStatusService flowStatusService, IRabbitMQProducer rabbitMQProducer)
 		{
 			_flowStatusService = flowStatusService;
 			_rabbitMQProducer = rabbitMQProducer;
-		}
+        }
 
 		public FlowStatus AddFlowStatus(FlowStatus flowStatus)
 		{
 			_flowStatusService.CreateFlowStatus(flowStatus);
 
-			//send the inserted product data to the queue and consumer will listening this data from queue
-			//_rabbitMQProducer.Connect("flowstatus_created");
-			//_rabbitMQProducer.SendMessage(flowStatus, "flowstatus_created");
-			//_rabbitMQProducer.Disconnect();
+            if (_flowStatusDictionary.TryGetValue(flowStatus.FlowId, out string currentStatus))
+            {
+                // Check if the status has changed from "Succeeded" to "Failed"
+                if (currentStatus == "Succeeded" && flowStatus.Status == "Failed")
+                {
+                    // Send the message to the queue
+                    _rabbitMQProducer.Connect("flowstatus_changed");
+                    _rabbitMQProducer.SendMessage(flowStatus, "flowstatus_changed");
+                    _rabbitMQProducer.Disconnect();
+                }
+            }
 
-			return flowStatus;
+            // Update the flow status in the dictionary
+            _flowStatusDictionary[flowStatus.FlowId] = flowStatus.Status;
+
+            return flowStatus;
 		}
 
         public async Task<IEnumerable<FlowStatusModel>> GetAllFlowStatuses()

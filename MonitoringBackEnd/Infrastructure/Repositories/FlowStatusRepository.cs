@@ -21,13 +21,12 @@ namespace Infrastructure.Repositories
 			var results = await _influxDBService.QueryAsync(async query =>
 			{
 				var currentTime = DateTime.UtcNow;
-				var fiveMinutesAgo = currentTime.AddMinutes(-60);
+				var fiveMinutesAgo = currentTime.AddMinutes(-30);
 
 				// Create the Flux query to get the last 5 minutes of data
 				var flux = $"from(bucket:\"poc-bucket\") |> range(start: {fiveMinutesAgo:o}, stop: {currentTime:o})";
 
 				var tables = await query.QueryAsync(flux, "fourtop-ict");
-				Console.WriteLine(tables);
 
 				return tables.SelectMany(table =>
 					table.Records.Select(record =>

@@ -62,7 +62,6 @@ app.Lifetime.ApplicationStopping.Register(() =>
 });
 
 // Schedule recurring tasks
-var random = new Random();
 app.Services.UseScheduler(scheduler =>
 {
 	scheduler.Schedule(async () =>
@@ -98,7 +97,7 @@ app.Services.UseScheduler(scheduler =>
 			Console.WriteLine(ex.Message);
 		}
 	})
-	.EveryFifteenMinutes();
+	.EveryMinute();
 });
 
 // Start the application

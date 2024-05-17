@@ -24,17 +24,20 @@ class FlowController {
             await this.rabbitMQService.connect();
             console.log("Connected to RabbitMQ");
             
-            await this.rabbitMQService.consumeEvents("flowstatus_created", (eventData) =>
+            await this.rabbitMQService.consumeEvents("flowstatus_changed", (eventData) =>
                 this.handleFlowStatusCreatedEvent(eventData)
             );
-            console.log("Started listening for flowstatus_created events");
+            console.log("Started listening for flowstatus_changed events");
         } catch (error) {
-            console.error("Error while listening for flowstatus_created events:", error);
+            console.error("Error while listening for flowstatus_changed events:", error);
         }
     }
 
     async handleFlowStatusCreatedEvent(eventData: any): Promise<void> {
         try {
+            // Log the event data being sent
+            console.log("Sending event data to WebSocket clients:", eventData);
+
             // Broadcast to all connected WebSocket clients
             this.wss.clients.forEach((client) => {
                 if (client.readyState === WebSocket.OPEN) {

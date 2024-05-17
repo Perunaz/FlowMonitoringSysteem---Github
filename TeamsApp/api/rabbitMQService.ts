@@ -5,7 +5,7 @@ class RabbitMQService {
 	private connectionUrl: string;
 	private connection: amqp.Connection | null;
 	private channelReceivingRPC: amqp.Channel | null;
-	private channelProducingTokenRPC: amqp.Channel | null;
+	//private channelProducingTokenRPC: amqp.Channel | null;
 	private retryDelay: number;
 	private maxRetryAttempts: number;
 	private currentRetryAttempts: number = 0;
@@ -20,7 +20,7 @@ class RabbitMQService {
 		this.connectionUrl = connectionUrl;
 		this.connection = null;
 		this.channelReceivingRPC = null;
-		this.channelProducingTokenRPC = null;
+		//this.channelProducingTokenRPC = null;
 		this.rpcQueueName = null;
 		this.accessToken = null;
 		this.retryDelay = retryDelay;
@@ -33,9 +33,9 @@ class RabbitMQService {
 				await this.setupChannelReceivingRPC();
 			}
 
-			if (!this.channelProducingTokenRPC) {
-				//await this.setupChannelProducingRPC("token");
-			}
+			// if (!this.channelProducingTokenRPC) {
+			// 	await this.setupChannelProducingRPC("token");
+			// }
 			return;
 		}
 
@@ -119,7 +119,7 @@ class RabbitMQService {
 				if (error1) {
 					reject(error1); // Error while creating the channel
 				} else {
-					this.channelProducingTokenRPC = channel;
+					//this.channelProducingTokenRPC = channel;
 	
 					const queue = queueName;
 	
@@ -289,7 +289,7 @@ class RabbitMQService {
 	async restartConnection(): Promise<void> {
 		this.connection = null;
 		this.channelReceivingRPC = null;
-		this.channelProducingTokenRPC = null;
+		//this.channelProducingTokenRPC = null;
 		this.rpcQueueName = null;
 		return await this.connect();
 	};
