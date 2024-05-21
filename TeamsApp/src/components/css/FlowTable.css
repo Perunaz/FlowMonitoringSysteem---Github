@@ -1,0 +1,31 @@
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Microsoft Teams font */
+  }
+  
+  .th {
+    background-color: #1A1246;
+    color: #FFFFFF;
+    padding: 12px;
+    text-align: left;
+    border: 1px solid #FFFFFF;
+  }
+  
+  .td {
+    padding: 12px;
+  }
+  
+  .td.success-percentage {
+    font-weight: bold;
+    border-bottom: 0px;
+  }
+
+  .td.last-status {
+    font-weight: bold;
+    border-bottom: 0px;
+  }
+
+  .td {
+    border-bottom: 1px solid #c0bfbf;
+  }

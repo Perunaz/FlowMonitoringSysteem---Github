@@ -101,3 +101,17 @@ pre::-webkit-scrollbar {
   justify-content: center;
   align-items: center;
 }
+
+.tab::after {
+  background-color: #1a1246 !important;
+}
+
+.welcome.page,
+.narrow.page-padding,
+.tabList,
+.custom-tab,
+.chart-container,
+.chart-container > *,
+.page-padding > * {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}

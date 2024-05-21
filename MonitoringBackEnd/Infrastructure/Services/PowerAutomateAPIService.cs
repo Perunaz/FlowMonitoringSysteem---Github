@@ -52,8 +52,8 @@ public class PowerAutomateAPIService
 		return await GetResourceAsync($"https://api.flow.microsoft.com/providers/Microsoft.ProcessSimple/environments/Default-{_tenantId}/flows/");
 	}
 
-	public async Task<string> GetResourceFromPowerAutomateFlowLastRunAsync(string flowId)
+	public async Task<string> GetResourceFromPowerAutomateFlowRunsAsync(string flowId)
 	{
-		return await GetResourceAsync($"https://api.flow.microsoft.com/providers/Microsoft.ProcessSimple/environments/Default-{_tenantId}/flows/{flowId}/runs?$top=1");
+		return await GetResourceAsync($"https://api.flow.microsoft.com/providers/Microsoft.ProcessSimple/environments/Default-{_tenantId}/flows/{flowId}/runs");
 	}
 }

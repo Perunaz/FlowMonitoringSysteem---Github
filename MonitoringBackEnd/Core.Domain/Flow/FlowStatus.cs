@@ -8,26 +8,32 @@ namespace Core.Domain.Flow
         public Guid FlowId { get; set; }
         public string DisplayName { get; set; }
 		public string Status { get; set; }
+		public int SuccessPercentage { get; set; }
+		public int RunCount { get; set; }
 
-        // Parameterless constructor
-        public FlowStatus()
+		// Parameterless constructor
+		public FlowStatus()
         {
         }
 
         // Parameterized constructor with Guid parameter
-        public FlowStatus(Guid flowId, string displayName, string status)
+        public FlowStatus(Guid flowId, string displayName, string status, int successPercentage, int runCount)
         {
             FlowId = flowId;
             DisplayName = displayName;
 			Status = status;
+            SuccessPercentage = successPercentage;
+            RunCount = runCount;
         }
 
         // Parameterized constructor with string parameter for FlowId
-        public FlowStatus(string flowId, string displayName, string status)
+        public FlowStatus(string flowId, string displayName, string status, int successPercentage, int runCount)
         {
             FlowId = Guid.Parse(flowId);
 			DisplayName = displayName;
 			Status = status;
-        }
+			SuccessPercentage = successPercentage;
+			RunCount = runCount;
+		}
     }
 }

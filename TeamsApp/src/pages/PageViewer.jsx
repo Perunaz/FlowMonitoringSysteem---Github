@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { TabList, Tab } from "@fluentui/react-components";
 import "./css/PageViewer.css";
 import FlowLineChart from "../components/FlowLineChart"
-import Table from "../components/Table";
+import FlowTable from "../components/FlowTable";
+import FlowBarChart from "../components/FlowBarChart";
 //import { PublicClientApplication } from '@azure/msal-browser';
 //import { checkIfTokenIsValid } from "../utils/checkIfTokenIsValid";
 //import config from "../components/config/config";
@@ -76,12 +77,7 @@ export function PageViewer(props) {
   const [selectedValue, setSelectedValue] = useState("dashboard");
 //  const [initialized, setInitialized] = useState(false);
   const [flowData, setFlowData] = useState([]);
-  const [lastStatusData, setLastStatusData] = useState([]);
-
-  const columns = [
-    { key: 'name', displayName: 'Flow Name' },
-    { key: 'lastStatus', displayName: 'Last Status' },
-  ];
+  const [flowTableData, setflowTableData] = useState([]);
 
   const onTabSelect = (event, data) => {
     setSelectedValue(data.value);
@@ -127,21 +123,29 @@ export function PageViewer(props) {
       .then((response) => response.json())
       .then((data) => {
         const flowMap = {};
+        console.log(data);
 
         data.forEach((item) => {
-          const { FlowId, DisplayName, Status, Time } = item;
+          const { FlowId, DisplayName, Status, SuccessPercentage, RunCount, Time } = item;
+          // Check if flowMap already has the FlowId
           if (!flowMap[FlowId]) {
-            flowMap[FlowId] = { name: DisplayName, data: [] };
+              flowMap[FlowId] = { name: '', data: [] };
+          }
+          // If DisplayName is different from the last stored name, update it
+          if (flowMap[FlowId].name !== DisplayName) {
+              flowMap[FlowId].name = DisplayName;
           }
           const timeOnly = new Date(Time).toLocaleTimeString("en-GB", {
-            hour12: false,
+              hour12: false,
           });
           flowMap[FlowId].data.push({
-            time: timeOnly,
-            status: Status,
-            originalTime: Time // Storing original time for sorting
+              time: timeOnly,
+              status: Status,
+              runCount: RunCount,
+              successPercentage: SuccessPercentage,
+              originalTime: Time // Storing original time for sorting
           });
-        });
+      });
 
         Object.values(flowMap).forEach((flow) => {
           flow.data.sort((a, b) => new Date(a.originalTime) - new Date(b.originalTime));
@@ -150,25 +154,32 @@ export function PageViewer(props) {
         setFlowData(Object.values(flowMap));
 
         // Extracting last status data
-        const lastStatus = Object.values(flowMap).map(flow => ({
-          name: flow.name,
-          lastStatus: flow.data[flow.data.length - 1].status
-        }));
+        const flowTableRows = Object.values(flowMap).map(flow => {
+          return {
+            name: flow.name,
+            successPercentage: flow.data[flow.data.length - 1].successPercentage + "%",
+            lastStatus: flow.data[flow.data.length - 1].status
+          };
+        });
 
-        setLastStatusData(lastStatus);
+        setflowTableData(flowTableRows);
       })
       .catch((error) => {
         console.error("Error fetching flow data:", error);
       });
   }, []);
 
+
   return (
     <div className="welcome page">
       <div className="narrow page-padding">
         <div className="tabList">
           <TabList selectedValue={selectedValue} onTabSelect={onTabSelect}>
-            <Tab id="Dashboard" value="dashboard">
+            <Tab id="Dashboard" value="dashboard" className="tab">
               1. Dashboard
+            </Tab>
+            <Tab id="Top-runs" value="top-runs" className="tab">
+              2. Top Runs
             </Tab>
           </TabList>
             {selectedValue === "dashboard" && (
@@ -177,7 +188,15 @@ export function PageViewer(props) {
                   <FlowLineChart flows={flowData} />
                 </div>
                 <div>
-                  <Table rowData={lastStatusData} columns={columns} />
+                  <FlowTable rowData={flowTableData} />
+                </div>
+              </>
+            )}
+            {selectedValue === "top-runs" && (
+              <>
+                <div className="chart-container">
+                  <p></p>
+                  <FlowBarChart flows={flowData} />
                 </div>
               </>
             )}

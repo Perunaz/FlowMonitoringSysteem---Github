@@ -1,53 +1,77 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
+// Helper function to round timestamps to the nearest interval (e.g., minute)
+const roundTimestamp = (timestamp, intervalInSeconds) => {
+    const intervalInMillis = intervalInSeconds * 1000;
+    return Math.round(timestamp / intervalInMillis) * intervalInMillis;
+};
+
 const FlowLineChart = ({ flows }) => {
     if (!flows || flows.length === 0) {
         return <div>No data available</div>;
     }
 
     const lineColors = [
-        "#8884d8",
-        "#82ca9d",
-        "#ffc658",
-        "#ff7300",
-        "#d0ed57",
-        "#a4de6c",
+        "#1A1246",
+        "#6C225B",
+        "#B1405F",
+        "#E47357",
+        "#FDB354",
+        "#F9F871",
     ];
 
-    const statusMap = {
-        "Failed": 0,
-        "Succeeded": 1,
-    };
-
     const getStatusValue = (status) => {
-        if (status in statusMap) {
-            return statusMap[status];
+        if (status === "Succeeded") {
+            return 1;
         } else {
-            return 0; // Default to 0 if status is not found in statusMap
+            return 0; // Default to 0 if status is not "Succeeded"
         }
     };
 
-    // Convert status values to numbers
-    const transformedData = flows.map(flow => ({
-        name: flow.name,
-        data: flow.data.map(entry => ({
-            ...entry,
-            status: getStatusValue(entry.status)
-        }))
-    }));
+    const intervalInSeconds = 60; // Define the interval for rounding (e.g., 60 seconds)
+
+    // Convert status values to numbers and convert time to timestamps
+    const transformedData = flows.map(flow => {
+        const roundedData = {};
+
+        flow.data.forEach(entry => {
+            const roundedTimestamp = roundTimestamp(new Date(entry.originalTime).getTime(), intervalInSeconds);
+            if (!roundedData[roundedTimestamp]) {
+                roundedData[roundedTimestamp] = { ...entry, timestamp: roundedTimestamp, count: 0 };
+            }
+            roundedData[roundedTimestamp].count += 1;
+            roundedData[roundedTimestamp].status = getStatusValue(entry.status);
+        });
+
+        return {
+            name: flow.name,
+            data: Object.values(roundedData)
+                .sort((a, b) => a.timestamp - b.timestamp) // Sorting by timestamp
+        };
+    });
 
     return (
-        <ResponsiveContainer width="100%" height="100%">
-            <LineChart>
+        <ResponsiveContainer width="100%" height="100%" maxHeight={500}>
+            <LineChart margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="time" type="category" allowDuplicatedCategory={false} />
+                <XAxis
+                    dataKey="timestamp"
+                    type="number"
+                    domain={['auto', 'auto']}
+                    tickFormatter={(tick) => new Date(tick).toLocaleTimeString()} // Convert timestamp back to readable time
+                />
                 <YAxis
                     domain={[-0.1, 1.1]}
                     ticks={[0, 1]}
                     tickFormatter={(value) => value === 0 ? "Failed" : "Succeeded"} // Custom tick formatter
                 />
-                <Tooltip />
+                <Tooltip
+                    labelFormatter={(label) => new Date(label).toLocaleTimeString()} // Convert timestamp in tooltip
+                    formatter={(value) => value === 0 ? "Failed" : "Succeeded"} // Convert status value in tooltip
+                    isAnimationActive={false} // Disable tooltip animation
+                    contentStyle={{ pointerEvents: 'none' }} // Prevent tooltip from blocking cursor
+                />
                 <Legend />
                 {transformedData.map((s, index) => (
                     <Line

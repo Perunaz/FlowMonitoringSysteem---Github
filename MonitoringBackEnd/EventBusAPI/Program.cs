@@ -78,17 +78,30 @@ app.Services.UseScheduler(scheduler =>
 
 			foreach (var flow in flows.value)
 			{
-				// Get last run of the 
 				var flowName = flow.name.ToString();
-				var lastRun = JObject.Parse(await powerAutomateAPIService.GetResourceFromPowerAutomateFlowLastRunAsync(flowName));
+				var flowRuns = JObject.Parse(await powerAutomateAPIService.GetResourceFromPowerAutomateFlowRunsAsync(flowName));
+				var flowRunCount = flowRuns.value.Count;
+
+				// Count the number of successful runs
+				int successCount = 0;
+				foreach (var run in flowRuns.value)
+				{
+					if (run.properties.status.ToString() == "Succeeded")
+					{
+						successCount++;
+					}
+				}
+
+				// Calculate the success percentage
+				int flowRunSuccessPercentage = (int)((double)successCount / flowRunCount * 100);
 
 				// Extract required information
 				var flowId = flow.name.ToString();
 				var displayName = flow.properties.displayName.ToString();
-				var lastRunStatus = lastRun.value[0].properties.status.ToString();
+				var lastRunStatus = flowRuns.value[0].properties.status.ToString();
 
 				// Create object and add to list
-				var newFlowStatus = new FlowStatus(flowId, displayName, lastRunStatus);
+				var newFlowStatus = new FlowStatus(flowId, displayName, lastRunStatus, flowRunSuccessPercentage, flowRunCount);
 				controller.AddFlowStatus(newFlowStatus);
 			}
 		}
@@ -97,7 +110,7 @@ app.Services.UseScheduler(scheduler =>
 			Console.WriteLine(ex.Message);
 		}
 	})
-	.EveryMinute();
+	.EveryTenMinutes();
 });
 
 // Start the application

@@ -4,6 +4,7 @@ using InfluxDB.Client.Api.Domain;
 using InfluxDB.Client.Writes;
 using Infrastructure.Services;
 using Newtonsoft.Json.Linq;
+using System.Linq;
 
 namespace Infrastructure.Repositories
 {
@@ -21,21 +22,39 @@ namespace Infrastructure.Repositories
 			var results = await _influxDBService.QueryAsync(async query =>
 			{
 				var currentTime = DateTime.UtcNow;
-				var fiveMinutesAgo = currentTime.AddMinutes(-30);
+				var thirtyMinutesAgo = currentTime.AddMinutes(-30);
 
-				// Create the Flux query to get the last 5 minutes of data
-				var flux = $"from(bucket:\"poc-bucket\") |> range(start: {fiveMinutesAgo:o}, stop: {currentTime:o})";
+				// Create the Flux query to get the last 30 minutes of data and pivot it
+				var flux = $@"
+						from(bucket: ""poc-bucket"")
+							|> range(start: {thirtyMinutesAgo:o}, stop: {currentTime:o})
+							|> filter(fn: (r) => r._measurement == ""flowStatus"")
+							|> pivot(rowKey: [""_time""], columnKey: [""_field""], valueColumn: ""_value"")
+				";
 
 				var tables = await query.QueryAsync(flux, "fourtop-ict");
 
 				return tables.SelectMany(table =>
 					table.Records.Select(record =>
 					{
+						var flowId = record.GetValueByKey("flowId")?.ToString();
+						var name = record.GetValueByKey("name")?.ToString();
+						var status = record.GetValueByKey("status")?.ToString();
+						var successPercentage = record.GetValueByKey("successPercentage") != null
+							? Convert.ToInt32(record.GetValueByKey("successPercentage"))
+							: 0;
+						var runCount = record.GetValueByKey("runCount") != null
+							? Convert.ToInt32(record.GetValueByKey("runCount"))
+							: 0;
+						var time = record.GetTime().ToString();
+
 						var flowStatus = new FlowStatusModel(
-							record.GetValueByKey("flowId").ToString(),
-							record.GetValueByKey("name").ToString(),
-							record.GetValue().ToString(),
-							record.GetTime().ToString()
+							flowId,
+							name,
+							status,
+							successPercentage,
+							runCount,
+							time
 						);
 
 						return flowStatus;
@@ -55,8 +74,10 @@ namespace Infrastructure.Repositories
 					var point = PointData.Measurement("flowStatus")
 						.Tag("flowId", flowStatus.FlowId.ToString())
 						.Tag("name", flowStatus.DisplayName)
-						.Field("value", flowStatus.Status)
-                        .Timestamp(DateTime.UtcNow, WritePrecision.Ns);
+						.Tag("status", flowStatus.Status)
+						.Field("successPercentage", flowStatus.SuccessPercentage)
+						.Field("runCount", flowStatus.RunCount)
+						.Timestamp(DateTime.UtcNow, WritePrecision.Ns);
 
 					write.WritePoint(point, "poc-bucket", "fourtop-ict");
 				});
