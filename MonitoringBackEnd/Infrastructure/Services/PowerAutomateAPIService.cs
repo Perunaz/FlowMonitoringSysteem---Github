@@ -22,7 +22,7 @@ public class PowerAutomateAPIService
 
 	private async Task<string> GetResourceAsync(string endpoint)
 	{
-		var accessToken = await _tokenManagementService.GetAccessTokenAsync();
+		var accessToken = await _tokenManagementService.GetAccessTokenAsync("https://service.flow.microsoft.com/");
 
 		using (var httpClient = new HttpClient())
 		{
@@ -40,7 +40,7 @@ public class PowerAutomateAPIService
 
 			if (!response.IsSuccessStatusCode)
 			{
-				throw new Exception($"Failed to fetch resource from {endpoint}. Status code: {response.StatusCode}");
+				throw new Exception($"Failed to fetch resource from {endpoint}. Response: {response}");
 			}
 
 			return await response.Content.ReadAsStringAsync();
