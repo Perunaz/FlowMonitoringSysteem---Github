@@ -22,7 +22,7 @@ public class PowerAutomateAPIService
 
 	private async Task<string> GetResourceAsync(string endpoint)
 	{
-		var accessToken = await _tokenManagementService.GetAccessTokenAsync("https://service.flow.microsoft.com/");
+		var accessToken = await _tokenManagementService.GetAccessTokenAsync();
 
 		using (var httpClient = new HttpClient())
 		{
@@ -30,13 +30,13 @@ public class PowerAutomateAPIService
 
 			var response = await httpClient.GetAsync(endpoint);
 
-			//if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-			//{
-			//	// Refresh token
-			//	accessToken = await _tokenManagementService.RefreshAccessTokenAsync();
-			//	httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-			//	response = await httpClient.GetAsync(endpoint);
-			//}
+			if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+			{
+				// Refresh token
+				accessToken = await _tokenManagementService.RefreshAccessTokenAsync();
+				httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+				response = await httpClient.GetAsync(endpoint);
+			}
 
 			if (!response.IsSuccessStatusCode)
 			{
