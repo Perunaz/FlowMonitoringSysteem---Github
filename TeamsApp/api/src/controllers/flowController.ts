@@ -42,28 +42,37 @@ class FlowController {
             const postData = {
                 "@type": "MessageCard",
                 "@context": "http://schema.org/extensions",
-                "themeColor": "0076D7",
-                "summary": `Flow Status: ${eventData.Status}`,
+                "themeColor": "1a1246",
+                "summary": "Flow Failed: " + eventData.FlowId,
                 "sections": [{
-                    "activityTitle": "Flow Status Update",
-                    "activitySubtitle": `Flow ID: ${eventData.FlowId}`,
-                    "activityImage": "https://i.pinimg.com/originals/a0/c6/d6/a0c6d6d5bb928ad13d2ebcf7b1f7d602.png",
+                    "activityTitle": "A Flow Has Failed",
+                    "activityImage": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Microsoft_Power_Automate.svg/2048px-Microsoft_Power_Automate.svg.png",
                     "facts": [{
-                        "name": "Flow ID",
-                        "value": eventData.FlowId
-                    },{
-                        "name": "Display Name",
+                        "name": "Flow Name",
                         "value": eventData.DisplayName
                     },{
                         "name": "Status",
                         "value": eventData.Status
                     }],
                     "markdown": true
+                    
+                }],
+                "potentialAction": [{
+                    "@type": "OpenUri",
+                    "name": "Go To Flow",
+                    "targets": [{
+                        "os": "default",
+                        "uri": `https://make.powerautomate.com/environments/Default-${process.env.TENANT_ID}/flows/${eventData.FlowId}/details`
+                    }]
                 }]
             };
 
             // The webhook URL
-            const webhookUrl = 'https://fourtopstaging.webhook.office.com/webhookb2/064dc41d-8e5d-4b81-8c52-9979418549f6@ee5fab9c-fc10-4fbf-b8f6-387bffbb5196/IncomingWebhook/55adce1ba6804b94908034c67abee66f/c5fa6eec-2c80-4123-a51e-7404f96da1ed';
+            const webhookUrl = process.env.WEBHOOK_URL;
+
+            if (!webhookUrl) {
+                throw new Error("WEBHOOK_URL environment variable is not set.");
+            }
 
             // Send the POST request to the webhook URL
             const response = await axios.post(webhookUrl, postData, {

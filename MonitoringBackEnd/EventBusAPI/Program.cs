@@ -110,7 +110,7 @@ app.Services.UseScheduler(scheduler =>
 			Console.WriteLine(ex.Message);
 		}
 	})
-	.EveryTenMinutes();
+	.EveryMinute();
 });
 
 // Start the application
