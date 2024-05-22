@@ -17,6 +17,15 @@
     "aadAppOauthAuthorityHost": {
       "value": "${{AAD_APP_OAUTH_AUTHORITY_HOST}}"
     },
+    "apiClientId": {
+      "value": "${{API_CLIENT_ID}}"
+    },
+    "apiClientSecret": {
+      "value": "${{API_CLIENT_SECRET}}"
+    },
+    "apiTenantId": {
+      "value": "${{REACT_APP_API_TENANT_ID}}"
+    },
     "functionAppSKU": {
       "value": "B1"
     },

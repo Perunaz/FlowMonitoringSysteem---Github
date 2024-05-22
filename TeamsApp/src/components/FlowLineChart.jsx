@@ -1,44 +1,91 @@
-import React, { PureComponent } from 'react';
+import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-export default class FlowLineChart extends PureComponent {
-  render() {
-    const { flows } = this.props;
-    console.log(flows);
+// Helper function to round timestamps to the nearest interval (e.g., minute)
+const roundTimestamp = (timestamp, intervalInSeconds) => {
+    const intervalInMillis = intervalInSeconds * 1000;
+    return Math.round(timestamp / intervalInMillis) * intervalInMillis;
+};
 
-    // Define a list of colors for the lines
+const FlowLineChart = ({ flows }) => {
+    if (!flows || flows.length === 0) {
+        return <div>No data available</div>;
+    }
+
     const lineColors = [
-      "#8884d8", // Purple/Blue
-      "#82ca9d", // Light Green
-      "#ffc658", // Orange/Yellow
-      "#ff7300", // Orange
-      "#d0ed57", // Lime Green
-      "#a4de6c", // Light Lime
+        "#1A1246",
+        "#6C225B",
+        "#B1405F",
+        "#E47357",
+        "#FDB354",
+        "#F9F871",
     ];
 
+    const getStatusValue = (status) => {
+        if (status === "Succeeded") {
+            return 1;
+        } else {
+            return 0; // Default to 0 if status is not "Succeeded"
+        }
+    };
+
+    const intervalInSeconds = 60; // Define the interval for rounding (e.g., 60 seconds)
+
+    // Convert status values to numbers and convert time to timestamps
+    const transformedData = flows.map(flow => {
+        const roundedData = {};
+
+        flow.data.forEach(entry => {
+            const roundedTimestamp = roundTimestamp(new Date(entry.originalTime).getTime(), intervalInSeconds);
+            if (!roundedData[roundedTimestamp]) {
+                roundedData[roundedTimestamp] = { ...entry, timestamp: roundedTimestamp, count: 0 };
+            }
+            roundedData[roundedTimestamp].count += 1;
+            roundedData[roundedTimestamp].status = getStatusValue(entry.status);
+        });
+
+        return {
+            name: flow.name,
+            data: Object.values(roundedData)
+                .sort((a, b) => a.timestamp - b.timestamp) // Sorting by timestamp
+        };
+    });
+
     return (
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="time" type="category" allowDuplicatedCategory={false} />
-          <YAxis 
-            dataKey="statecode" 
-            domain={[-0.1, 1.1]}
-            ticks={[0, 1]} 
-          />
-          <Tooltip />
-          <Legend />
-          {flows.map((s, index) => (
-            <Line
-              key={s.name}
-              dataKey="statecode"
-              data={s.data}
-              name={s.name}
-              stroke={lineColors[index % lineColors.length]}
-            />
-          ))}
-        </LineChart>
-      </ResponsiveContainer>
+        <ResponsiveContainer width="100%" height="100%" maxHeight={500}>
+            <LineChart margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                    dataKey="timestamp"
+                    type="number"
+                    domain={['auto', 'auto']}
+                    tickFormatter={(tick) => new Date(tick).toLocaleTimeString()} // Convert timestamp back to readable time
+                />
+                <YAxis
+                    domain={[-0.1, 1.1]}
+                    ticks={[0, 1]}
+                    tickFormatter={(value) => value === 0 ? "Failed" : "Succeeded"} // Custom tick formatter
+                />
+                <Tooltip
+                    labelFormatter={(label) => new Date(label).toLocaleTimeString()} // Convert timestamp in tooltip
+                    formatter={(value) => value === 0 ? "Failed" : "Succeeded"} // Convert status value in tooltip
+                    isAnimationActive={false} // Disable tooltip animation
+                    contentStyle={{ pointerEvents: 'none' }} // Prevent tooltip from blocking cursor
+                />
+                <Legend />
+                {transformedData.map((s, index) => (
+                    <Line
+                        key={s.name}
+                        type="monotone"
+                        dataKey="status"
+                        data={s.data || []}
+                        name={s.name}
+                        stroke={lineColors[index % lineColors.length]}
+                    />
+                ))}
+            </LineChart>
+        </ResponsiveContainer>
     );
-  }
 }
+
+export default FlowLineChart;

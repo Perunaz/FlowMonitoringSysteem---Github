@@ -6,13 +6,16 @@ import dotenv from 'dotenv';
 import { createServer } from 'http';
 import WebSocket from 'ws';
 import { validation, cast, entityNotFound } from "./errors";
-
 import RabbitMQService from "./rabbitMQService";
 import FlowController from "./src/controllers/flowController";
 import FlowRouter from "./src/routes/flow.routes";
+import TokenRouter from "./src/routes/token.routes";
+import TokenController from "./src/controllers/tokenController";
+
 
 dotenv.config();
 const app = express();
+
 
 app.use(helmet());
 app.use(cors());
@@ -25,25 +28,27 @@ app.use(express.json());
 const server = createServer(app);
 const wss = new WebSocket.Server({ server });
 
-
 // Create an instance of the RabbitMQService with the connection URL and exchange
 const rabbitMQService = new RabbitMQService(process.env.RABBITMQ_URL || "amqp://rabbitmq:5672");
 const flowController = new FlowController(rabbitMQService, wss);
+const tokenController = new TokenController(rabbitMQService);
 
 const flowRouter = new FlowRouter(flowController);
+const tokenRouter = new TokenRouter(tokenController);
 
 app.use("/api/v1/flow", flowRouter.getRouter());
+//app.use("/api/v1/token", tokenRouter.getRouter());
 
 // error handling middleware
 app.use(validation);
 app.use(cast);
 app.use(entityNotFound);
 
-// Start the HTTP server
-// const PORT = process.env.WS_PORT || 8080;
-// server.listen(PORT, () => {
-//   console.log(`WebSocket server listening on port ${PORT}`);
-// });
+//Start the HTTP server
+const PORT = process.env.WS_PORT || 8080;
+server.listen(PORT, () => {
+  console.log(`WebSocket server listening on port ${PORT}`);
+});
 
 flowController
   .listenForFlowStatusEvents()

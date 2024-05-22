@@ -136,6 +136,9 @@ deploy:
       REACT_APP_START_LOGIN_PAGE_URL: ${{TAB_ENDPOINT}}/auth-start.html
       REACT_APP_FUNC_NAME: getUserProfile
       REACT_APP_FUNC_ENDPOINT: ${{API_FUNCTION_ENDPOINT}}
+      REACT_APP_API_CLIENT_ID: ${{REACT_APP_API_CLIENT_ID}}
+      REACT_APP_API_CLIENT_SECRET: ${{REACT_APP_API_CLIENT_SECRET}}
+      REACT_APP_API_TENANT_ID: ${{REACT_APP_API_TENANT_ID}}
   # Deploy bits to Azure Static Web Apps
   - uses: cli/runNpxCommand
     name: deploy to Azure Static Web Apps

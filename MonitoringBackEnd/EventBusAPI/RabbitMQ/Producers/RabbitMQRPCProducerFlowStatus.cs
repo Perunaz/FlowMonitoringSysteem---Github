@@ -94,6 +94,5 @@ namespace EventBusAPI.RabbitMQ.Producers
 				channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
 			}
 		}
-
 	}
 }

@@ -7,14 +7,14 @@ using System.Threading.Channels;
 
 namespace EventBusAPI.RabbitMQ.Producers
 {
-	public class RabbitMQProducer : IRabbitMQProducer
+	public class RabbitMQExchangeProducer : IRabbitMQProducer
 	{
 		private string _hostName;
 		private int _port;
         private IConnection connection;
         private IModel channel;
 
-        public RabbitMQProducer(IConfiguration configuration)
+        public RabbitMQExchangeProducer(IConfiguration configuration)
 		{
 			_hostName = configuration.GetValue<string>("RabbitMQ:HostName");
 			_port = configuration.GetValue<int>("RabbitMQ:Port");
