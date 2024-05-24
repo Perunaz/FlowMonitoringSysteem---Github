@@ -18,12 +18,13 @@ namespace DomainServices.Services.Implementation
 			_flowStatusRepository = flowStatusRepository;
 		}
 
-		public Task CreateFlowStatus(FlowStatus flowStatus)
-		{
-			return _flowStatusRepository.WriteFlowStatus(flowStatus);
-		}
+        public async Task<FlowStatus> CreateFlowStatus(FlowStatus flowStatus)
+        {
+            await _flowStatusRepository.WriteFlowStatus(flowStatus);
+            return flowStatus;
+        }
 
-		public async Task<IEnumerable<FlowStatusModel>> GetAll()
+        public async Task<IEnumerable<FlowStatusModel>> GetAll()
 		{
 			return await _flowStatusRepository.GetAll();
 		}
