@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Microsoft.Extensions.Configuration;
-using System.Threading.Tasks;
-using System.Net.Http.Headers;
+using System.IdentityModel.Tokens.Jwt;
 
 public class TokenManagementService
 {
@@ -17,8 +13,6 @@ public class TokenManagementService
 	{
 		_configuration = configuration;
 		_httpClient = new HttpClient();
-		_accessToken = _configuration["AzureAD:AccessToken"];
-		_refreshToken = _configuration["AzureAD:RefreshToken"];
 	}
 
 	public async Task<string> GetAccessTokenAsync()
@@ -31,11 +25,40 @@ public class TokenManagementService
 		return _accessToken;
 	}
 
+	public async Task<string> GetTokensAsync()
+	{
+		var parameters = new Dictionary<string, string>
+		{
+			{ "client_id", _configuration["AzureAD:ClientId"] },
+			{ "client_secret", _configuration["AzureAD:ClientSecret"] },
+			{ "username", _configuration["AzureAD:UserName"] },
+			{ "password", _configuration["AzureAD:Password"] },
+			{ "grant_type", "password" },
+			{ "scope", "https://service.flow.microsoft.com//.default offline_access" }
+		};
+
+		var content = new FormUrlEncodedContent(parameters);
+		var response = await _httpClient.PostAsync($"https://login.microsoftonline.com/{_configuration["AzureAD:TenantId"]}/oauth2/v2.0/token", content);
+
+		if (!response.IsSuccessStatusCode)
+		{
+			throw new Exception("Failed to acquire token. StatusCode: " + response.StatusCode + ", ReasonPhrase: " + response.ReasonPhrase);
+		}
+
+		var responseContent = await response.Content.ReadAsStringAsync();
+		var tokenJson = JsonDocument.Parse(responseContent);
+
+		_accessToken = tokenJson.RootElement.GetProperty("access_token").GetString();
+		_refreshToken = tokenJson.RootElement.GetProperty("refresh_token").GetString();
+
+		return _accessToken;
+	}
+
 	public async Task<string> RefreshAccessTokenAsync()
 	{
 		if (_refreshToken == null)
 		{
-			throw new Exception("No refresh token available.");
+			return await GetTokensAsync();
 		}
 
 		var parameters = new Dictionary<string, string>
@@ -53,7 +76,7 @@ public class TokenManagementService
 
 		if (!response.IsSuccessStatusCode)
 		{
-			throw new Exception("Failed to refresh token. StatusCode: " + response.StatusCode + ", ReasonPhrase: " + response.ReasonPhrase);
+			return await GetTokensAsync();
 		}
 
 		var responseContent = await response.Content.ReadAsStringAsync();
@@ -65,14 +88,33 @@ public class TokenManagementService
 		return _accessToken;
 	}
 
-	public void SetTokens(string accessToken, string refreshToken)
-	{
-		_accessToken = accessToken;
-		_refreshToken = refreshToken;
-	}
-
 	private bool IsTokenExpired(string accessToken)
 	{
-		return string.IsNullOrEmpty(accessToken);
+		if (accessToken == null)
+		{
+			return true;
+		}
+
+		var handler = new JwtSecurityTokenHandler();
+		var jsonToken = handler.ReadToken(accessToken) as JwtSecurityToken;
+
+		var expirationDateUtc = jsonToken.ValidTo;
+
+		TimeSpan cetOffset = TimeSpan.FromHours(2);
+
+		if (TimeZoneInfo.Local.IsDaylightSavingTime(expirationDateUtc))
+		{
+			cetOffset = TimeSpan.FromHours(2);
+		}
+		else
+		{
+			cetOffset = TimeSpan.FromHours(1);
+		}
+
+		DateTime cetExpirationDate = expirationDateUtc.Add(cetOffset);
+
+		DateTime cetCurrentTime = DateTime.UtcNow.Add(cetOffset);
+
+		return cetExpirationDate < cetCurrentTime;
 	}
 }

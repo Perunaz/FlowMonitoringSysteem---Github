@@ -30,17 +30,17 @@ public class PowerAutomateAPIService
 
 			var response = await httpClient.GetAsync(endpoint);
 
-			//if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-			//{
-			//	// Refresh token
-			//	accessToken = await _tokenManagementService.RefreshAccessTokenAsync();
-			//	httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-			//	response = await httpClient.GetAsync(endpoint);
-			//}
+			if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+			{
+				// Refresh token
+				accessToken = await _tokenManagementService.RefreshAccessTokenAsync();
+				httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+				response = await httpClient.GetAsync(endpoint);
+			}
 
 			if (!response.IsSuccessStatusCode)
 			{
-				throw new Exception($"Failed to fetch resource from {endpoint}. Status code: {response.StatusCode}");
+				throw new Exception($"Failed to fetch resource from {endpoint}. Response: {response}");
 			}
 
 			return await response.Content.ReadAsStringAsync();
