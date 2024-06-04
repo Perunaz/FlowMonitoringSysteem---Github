@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+	<DataCollectionRunSettings>
+		<DataCollectors>
+			<DataCollector friendlyName="XPlat code coverage">
+				<Configuration>
+					<ExcludeByFile>**/EventBusAPI/Program.cs,**/EventBusAPI/RabbitMQ/**/*.cs,**/Infrastructure/**/PowerAutomateAPIService.cs,**/Infrastructure/**/TokenManagementService.cs,**/Infrastructure/**/InfluxDBService.cs,</ExcludeByFile>
+				</Configuration>
+			</DataCollector>
+		</DataCollectors>
+	</DataCollectionRunSettings>
+</RunSettings>

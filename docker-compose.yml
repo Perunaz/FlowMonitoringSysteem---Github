@@ -10,7 +10,13 @@ services:
       - "15672:15672"
       - "5672:5672"
     environment:
-      - RABBITMQ_CONFIG_FILE=./Rabbitmq/rabbitmq.conf
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
 
   influxdb:
     image: influxdb:latest
@@ -25,6 +31,21 @@ services:
       - INFLUXDB_ADMIN_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
       - INFLUXDB_USER=${INFLUXDB_USER}
       - INFLUXDB_USER_PASSWORD=${INFLUXDB_USER_PASSWORD}
+      - INFLUXDB_LOGGING_LEVEL=debug
+    healthcheck:
+      test: "curl -f http://localhost:8086/ping"
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+  sqlserverdb:
+    container_name: sqlserverdb
+    image:  mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - "1433:1433"
+    environment:
+      SA_PASSWORD: "Secret1234"
+      ACCEPT_EULA: "Y"
 
   notficationservice:
     build:
@@ -32,20 +53,61 @@ services:
       dockerfile: Dockerfile
     container_name: notificationService
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
     ports:
       - "3100:3100"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
+      - HTTPS=true
+      - SSL_CRT_FILE=/opt/project/ssl/cert.pem
+      - SSL_KEY_FILE=/opt/project/ssl/key.pem
+    
+  teamsapp:
+    build:
+      context: ./TeamsApp
+      dockerfile: Dockerfile
+    container_name: teamsapp
+    depends_on:
+      - teamsapi
+    ports:
+      - "53000:53000"
+    environment:
+      - NODE_ENV=development
+      - HTTPS=true
+      - PORT=53000
+      - TEAMS_APP_ID=4a224ec0-9d8b-4f61-8eb3-da737a4c367f
+      - REACT_APP_CLIENT_ID=ff3dd1f0-b9f6-45b1-8da2-dca9012c6795
+      - REACT_APP_START_LOGIN_PAGE_URL=https://localhost:53000/auth-start.html
+      - REACT_APP_FUNC_NAME=getToken
+      - REACT_APP_FUNC_ENDPOINT=http://localhost:7071
+      - export SSL_CRT_FILE=${TEAMS_SSL_CRT_FILE}
+      - export SSL_KEY_FILE=${TEAMS_SSL_KEY_FILE}
+    volumes:
+    - ~/.fx/certificate:/certificate:ro
 
-  backendinfrastructure:
+  teamsapi:
+    build:
+      context: ./TeamsApp/api
+      dockerfile: Dockerfile
+    container_name: teamsapi
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "7071:7071"
+      - "8080:8080"
+
+  backend:
     build:
       context: ./MonitoringBackEnd
       dockerfile: Dockerfile
-    container_name: backendInfrastructure
+    container_name: backend
     depends_on:
-      - rabbitmq
-      - influxdb
+      rabbitmq:
+        condition: service_healthy
+      influxdb:
+        condition: service_healthy
     ports:
       - "3000:3000"
     environment:

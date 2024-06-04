@@ -3,10 +3,7 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "resourceBaseName": {
-      "value": "tab${{RESOURCE_SUFFIX}}"
-    },
-    "storageSku": {
-      "value": "Standard_LRS"
+      "value": "helloworld${{RESOURCE_SUFFIX}}"
     },
     "aadAppClientId": {
       "value": "${{AAD_APP_CLIENT_ID}}"
@@ -20,14 +17,20 @@
     "aadAppOauthAuthorityHost": {
       "value": "${{AAD_APP_OAUTH_AUTHORITY_HOST}}"
     },
+    "apiClientId": {
+      "value": "${{API_CLIENT_ID}}"
+    },
+    "apiClientSecret": {
+      "value": "${{API_CLIENT_SECRET}}"
+    },
+    "apiTenantId": {
+      "value": "${{REACT_APP_API_TENANT_ID}}"
+    },
     "functionAppSKU": {
       "value": "B1"
     },
-    "functionStorageSKU": {
-      "value": "Standard_LRS"
-    },
-    "teamsAppId": {
-      "value": "${{TEAMS_APP_ID}}"
+    "staticWebAppSku": {
+      "value": "Free"
     }
   }
 }
